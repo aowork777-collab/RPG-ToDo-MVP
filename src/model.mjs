@@ -37,58 +37,9 @@ export function createId() {
 
 export function createDefaultState() {
   return {
-    totalXp: 1168,
+    totalXp: 0,
     filter: "active",
-    tasks: [
-      {
-        id: "demo-boss",
-        title: "プレゼン資料を完成させる",
-        difficulty: 4,
-        dueTime: "18:00",
-        isBoss: true,
-        completed: false,
-        reward: BOSS_REWARD,
-        earnedXp: 0,
-        createdAt: "2026-01-01T09:00:00.000Z",
-        completedAt: null,
-      },
-      {
-        id: "demo-clean",
-        title: "部屋を掃除する",
-        difficulty: 2,
-        dueTime: "",
-        isBoss: false,
-        completed: false,
-        reward: 20,
-        earnedXp: 0,
-        createdAt: "2026-01-01T09:01:00.000Z",
-        completedAt: null,
-      },
-      {
-        id: "demo-run",
-        title: "30分ランニング",
-        difficulty: 3,
-        dueTime: "19:30",
-        isBoss: false,
-        completed: false,
-        reward: 35,
-        earnedXp: 0,
-        createdAt: "2026-01-01T09:02:00.000Z",
-        completedAt: null,
-      },
-      {
-        id: "demo-mail",
-        title: "メールを3件返信する",
-        difficulty: 1,
-        dueTime: "",
-        isBoss: false,
-        completed: false,
-        reward: 10,
-        earnedXp: 0,
-        createdAt: "2026-01-01T09:03:00.000Z",
-        completedAt: null,
-      },
-    ],
+    tasks: [],
   };
 }
 

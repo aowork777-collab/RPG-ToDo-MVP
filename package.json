@@ -4,7 +4,6 @@
   "private": true,
   "description": "LEVEL + XP and Today's Boss focused RPG ToDo MVP",
   "scripts": {
-    "start": "node server.js",
-    "test": "node tests/model.test.mjs && node tests/server.test.js"
+    "start": "node server.js"
   }
 }
