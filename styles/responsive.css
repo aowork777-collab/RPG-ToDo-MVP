@@ -1,0 +1,145 @@
+@media (max-width: 920px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 38px;
+  }
+
+  .side-column {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .profile-card,
+  .how-it-works {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .topbar {
+    min-height: 76px;
+  }
+
+  .brand small,
+  .today,
+  #resetButton {
+    display: none;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .primary-button.compact {
+    min-height: 39px;
+    padding-inline: 12px;
+    font-size: 10px;
+  }
+
+  .dashboard-grid {
+    gap: 34px;
+    padding: 30px 0 55px;
+  }
+
+  .side-column {
+    display: flex;
+  }
+
+  .how-it-works {
+    display: none;
+  }
+
+  .section-tag {
+    display: none;
+  }
+
+  .boss-card {
+    min-height: 0;
+    padding: 22px 20px;
+  }
+
+  .boss-topline {
+    margin-bottom: 21px;
+  }
+
+  .boss-title {
+    margin-bottom: 19px;
+    font-size: 25px;
+  }
+
+  .boss-power-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .boss-power-row > span {
+    grid-column: 1 / -1;
+  }
+
+  .boss-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .complete-button {
+    width: 100%;
+  }
+
+  .quest-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filter-tabs {
+    width: 100%;
+  }
+
+  .filter-tab {
+    flex: 1;
+  }
+
+  .quest-item {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .quest-content {
+    width: calc(100% - 58px);
+    flex-basis: calc(100% - 58px);
+  }
+
+  .quest-actions {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 4px;
+    border-top: 1px solid var(--line);
+  }
+
+  .difficulty-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .form-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dialog-actions > button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

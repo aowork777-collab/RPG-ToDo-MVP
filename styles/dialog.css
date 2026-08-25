@@ -1,0 +1,214 @@
+.quest-dialog {
+  width: min(620px, calc(100% - 28px));
+  max-height: min(760px, calc(100vh - 28px));
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: #15181e;
+  color: var(--text);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+}
+
+.quest-dialog::backdrop {
+  background: rgba(5, 6, 8, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.quest-dialog form {
+  padding: 27px;
+}
+
+.dialog-header {
+  align-items: flex-start;
+  margin-bottom: 26px;
+}
+
+.dialog-header h2 {
+  font-size: 26px;
+}
+
+.field-label {
+  display: block;
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 49px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #0e1116;
+  color: var(--text);
+  transition: 150ms ease;
+}
+
+.text-input:hover,
+.text-input:focus {
+  border-color: var(--line-strong);
+}
+
+.text-input::placeholder {
+  color: #626a76;
+}
+
+fieldset {
+  margin: 23px 0;
+  padding: 0;
+  border: 0;
+}
+
+.difficulty-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+}
+
+.difficulty-options label {
+  cursor: pointer;
+}
+
+.difficulty-options input,
+.boss-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.difficulty-options span {
+  display: grid;
+  min-height: 58px;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  transition: 150ms ease;
+}
+
+.difficulty-options b {
+  overflow: hidden;
+  max-width: 64px;
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.difficulty-options small {
+  color: var(--muted);
+  font: 600 7px/1 var(--mono);
+}
+
+.difficulty-options input:checked + span {
+  border-color: rgba(241, 207, 106, 0.6);
+  background: rgba(241, 207, 106, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(241, 207, 106, 0.08);
+}
+
+.difficulty-options input:focus-visible + span,
+.boss-toggle input:focus-visible + .toggle-ui {
+  outline: 3px solid rgba(241, 207, 106, 0.45);
+  outline-offset: 3px;
+}
+
+.form-row {
+  align-items: flex-end;
+  gap: 22px;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+.boss-toggle {
+  display: flex;
+  flex: 1.25;
+  align-items: center;
+  gap: 10px;
+  min-height: 49px;
+  cursor: pointer;
+}
+
+.toggle-ui {
+  position: relative;
+  flex: 0 0 39px;
+  width: 39px;
+  height: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  transition: 150ms ease;
+}
+
+.toggle-ui::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  content: "";
+  transition: 150ms ease;
+}
+
+.boss-toggle input:checked + .toggle-ui {
+  border-color: rgba(255, 107, 94, 0.45);
+  background: rgba(255, 107, 94, 0.12);
+}
+
+.boss-toggle input:checked + .toggle-ui::after {
+  left: 20px;
+  background: var(--red);
+}
+
+.boss-toggle > span:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.boss-toggle strong,
+.boss-toggle small {
+  font-family: var(--mono);
+}
+
+.boss-toggle strong {
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+.boss-toggle small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.reward-preview {
+  margin: 24px 0;
+  padding: 15px 17px;
+  border: 1px solid rgba(241, 207, 106, 0.2);
+  border-radius: 11px;
+  background: rgba(241, 207, 106, 0.055);
+}
+
+.reward-preview span {
+  color: var(--muted);
+  font: 700 9px/1 var(--mono);
+  letter-spacing: 0.1em;
+}
+
+.reward-preview strong {
+  color: var(--gold-bright);
+  font: 800 16px/1 var(--mono);
+}
+
+.dialog-actions {
+  justify-content: flex-end;
+  gap: 9px;
+}

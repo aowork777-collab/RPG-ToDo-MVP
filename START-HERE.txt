@@ -1,0 +1,32 @@
+RPG ToDo — VS Codeでの起動方法
+================================
+
+1. ZIPを展開します。
+2. VS Codeの「ファイル」→「フォルダーを開く」で、
+   index.html と server.js が入っているフォルダーを開きます。
+3. F5キーを押します。
+4. 「RPG ToDoを起動」を選びます。
+5. http://localhost:8080/ が自動的に開きます。
+
+重要:
+アプリを使っている間は、VS Code下部のターミナルを閉じないでください。
+ターミナルを閉じると ERR_CONNECTION_REFUSED になります。
+
+F5で動かない場合:
+VS Codeのターミナルで次を実行してください。
+
+  npm start
+
+Node.jsが入っていない場合:
+
+Windows:
+  py -m http.server 8080
+
+macOS / Linux:
+  python3 -m http.server 8080
+
+コマンドを実行したターミナルを開いたまま、
+http://localhost:8080/ をブラウザで開いてください。
+
+この版は機能ごとにJavaScriptを分割しているため、ローカルサーバー経由で起動してください。
+index.htmlの直接ダブルクリックではなく、F5または上記コマンドを使用します。

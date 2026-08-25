@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111318" />
+    <meta
+      name="description"
+      content="今日のタスクをクエストに変える、LEVEL + XPに絞ったRPG ToDo。"
+    />
+    <title>RPG ToDo</title>
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/layout.css" />
+    <link rel="stylesheet" href="./styles/player.css" />
+    <link rel="stylesheet" href="./styles/boss.css" />
+    <link rel="stylesheet" href="./styles/quests.css" />
+    <link rel="stylesheet" href="./styles/dialog.css" />
+    <link rel="stylesheet" href="./styles/feedback.css" />
+    <link rel="stylesheet" href="./styles/responsive.css" />
+    <script type="module" src="./src/app.mjs"></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="RPG ToDo ホーム">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          <span>
+            <strong>RPG TODO</strong>
+            <small>DAILY QUEST BOARD</small>
+          </span>
+        </a>
+
+        <div class="topbar-actions">
+          <p class="today" id="todayLabel"></p>
+          <button class="icon-button" id="resetButton" type="button" aria-label="デモデータに戻す" title="デモデータに戻す">
+            <span aria-hidden="true">↺</span>
+          </button>
+          <button class="primary-button compact" id="openQuestButton" type="button">
+            <span aria-hidden="true">＋</span>
+            NEW QUEST
+          </button>
+        </div>
+      </header>
+
+      <main id="top" class="dashboard-grid">
+        <aside class="side-column" aria-label="プレイヤー情報">
+          <section class="profile-card panel">
+            <div class="eyebrow-row">
+              <p class="eyebrow">PLAYER STATUS</p>
+              <span class="online-indicator"><i aria-hidden="true"></i> READY</span>
+            </div>
+
+            <div class="player-identity">
+              <div class="avatar" aria-hidden="true">
+                <span>YOU</span>
+              </div>
+              <div>
+                <p class="player-name">YOU</p>
+                <p class="player-title">TASK ADVENTURER</p>
+              </div>
+            </div>
+
+            <div class="level-row">
+              <div>
+                <span class="level-label">LEVEL</span>
+                <strong class="level-number" id="levelNumber">12</strong>
+              </div>
+              <div class="xp-copy">
+                <strong id="xpCurrent">68</strong>
+                <span>/ 100 XP</span>
+              </div>
+            </div>
+
+            <div
+              class="xp-track"
+              id="xpTrack"
+              role="progressbar"
+              aria-label="次のレベルまでの経験値"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="68"
+            >
+              <span id="xpBar"></span>
+            </div>
+            <p class="next-level-copy" id="nextLevelCopy">あと 32 XP で LEVEL 13</p>
+
+            <div class="status-divider"></div>
+
+            <div class="mini-stats">
+              <div>
+                <span>ACTIVE QUESTS</span>
+                <strong id="activeQuestCount">0</strong>
+              </div>
+              <div>
+                <span>DEFEATED</span>
+                <strong id="completedQuestCount">0</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="how-it-works panel">
+            <p class="eyebrow">HOW TO PLAY</p>
+            <ol>
+              <li><span>01</span><p>今日やることを<br /><strong>クエストにする</strong></p></li>
+              <li><span>02</span><p>最重要タスクを<br /><strong>ボスに指定</strong></p></li>
+              <li><span>03</span><p>完了してXPを獲得<br /><strong>レベルアップ</strong></p></li>
+            </ol>
+          </section>
+        </aside>
+
+        <div class="main-column">
+          <section aria-labelledby="bossSectionTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow danger">PRIORITY MISSION</p>
+                <h1 id="bossSectionTitle">TODAY'S BOSS</h1>
+              </div>
+              <span class="section-tag">1 DAY / 1 BOSS</span>
+            </div>
+            <div id="bossContainer"></div>
+          </section>
+
+          <section class="quest-section" aria-labelledby="questSectionTitle">
+            <div class="section-heading quest-heading">
+              <div>
+                <p class="eyebrow">QUEST LOG</p>
+                <h2 id="questSectionTitle">今日のクエスト</h2>
+              </div>
+              <div class="filter-tabs" role="group" aria-label="クエストの表示切り替え">
+                <button type="button" class="filter-tab active" data-filter="active" aria-pressed="true">未完了</button>
+                <button type="button" class="filter-tab" data-filter="all" aria-pressed="false">すべて</button>
+                <button type="button" class="filter-tab" data-filter="completed" aria-pressed="false">完了</button>
+              </div>
+            </div>
+
+            <div class="quest-list" id="questList"></div>
+          </section>
+        </div>
+      </main>
+
+      <footer>
+        <span>RPG TODO / MVP</span>
+        <span>DATA SAVED ON THIS DEVICE</span>
+      </footer>
+    </div>
+
+    <dialog class="quest-dialog" id="questDialog" aria-labelledby="dialogTitle">
+      <form method="dialog" id="questForm">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">ADD TO QUEST LOG</p>
+            <h2 id="dialogTitle">新しいクエスト</h2>
+          </div>
+          <button class="icon-button" type="button" id="closeDialogButton" aria-label="閉じる">×</button>
+        </div>
+
+        <label class="field-label" for="questTitle">クエスト名</label>
+        <input
+          class="text-input"
+          id="questTitle"
+          name="title"
+          type="text"
+          maxlength="60"
+          autocomplete="off"
+          placeholder="例：部屋を掃除する"
+          required
+        />
+
+        <fieldset>
+          <legend class="field-label">難易度</legend>
+          <div class="difficulty-options">
+            <label><input type="radio" name="difficulty" value="1" /><span><b>★</b><small>EASY</small></span></label>
+            <label><input type="radio" name="difficulty" value="2" checked /><span><b>★★</b><small>NORMAL</small></span></label>
+            <label><input type="radio" name="difficulty" value="3" /><span><b>★★★</b><small>HARD</small></span></label>
+            <label><input type="radio" name="difficulty" value="4" /><span><b>★★★★</b><small>EPIC</small></span></label>
+            <label><input type="radio" name="difficulty" value="5" /><span><b>★★★★★</b><small>LEGEND</small></span></label>
+          </div>
+        </fieldset>
+
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="questDueTime">期限（任意）</label>
+            <input class="text-input" id="questDueTime" name="dueTime" type="time" />
+          </div>
+          <label class="boss-toggle">
+            <input id="makeBoss" name="isBoss" type="checkbox" />
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span><strong>TODAY'S BOSS</strong><small>最重要タスクに設定</small></span>
+          </label>
+        </div>
+
+        <div class="reward-preview">
+          <span>QUEST REWARD</span>
+          <strong id="rewardPreview">+20 XP</strong>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" id="cancelDialogButton">キャンセル</button>
+          <button class="primary-button" type="submit">クエストを追加</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+    <div class="level-flash" id="levelFlash" aria-hidden="true">
+      <p>LEVEL UP!</p>
+      <strong id="levelFlashNumber">13</strong>
+    </div>
+    <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+    <p class="sr-only" id="liveRegion" aria-live="assertive"></p>
+  </body>
+</html>

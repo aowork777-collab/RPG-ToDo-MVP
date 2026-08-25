@@ -1,0 +1,24 @@
+:root {
+  color-scheme: dark;
+  --bg: #0c0e12;
+  --surface: #14171d;
+  --surface-raised: #1a1e26;
+  --surface-soft: #11141a;
+  --line: #2a303a;
+  --line-strong: #3a424f;
+  --text: #f4f2ec;
+  --muted: #8f98a8;
+  --gold: #f1cf6a;
+  --gold-bright: #ffe595;
+  --gold-ink: #1c1708;
+  --red: #ff6b5e;
+  --red-deep: #9c322c;
+  --green: #79d6a3;
+  --blue: #8db3ff;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  --radius-lg: 22px;
+  --radius-md: 15px;
+  --radius-sm: 10px;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: Inter, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif;
+}
