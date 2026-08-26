@@ -43,11 +43,6 @@
 
     <link
       rel="stylesheet"
-      href="./styles/boss.css"
-    />
-
-    <link
-      rel="stylesheet"
       href="./styles/quests.css"
     />
 
@@ -300,29 +295,7 @@
 
         <!-- メインコンテンツ -->
         <div class="main-column">
-          <!-- 今日のボス -->
-          <section
-            aria-labelledby="bossSectionTitle"
-          >
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow danger">
-                  PRIORITY MISSION
-                </p>
-
-                <h1 id="bossSectionTitle">
-                  TODAY'S BOSS
-                </h1>
-              </div>
-
-              <span class="section-tag">
-                1 DAY / 1 BOSS
-              </span>
-            </div>
-
-            <div id="bossContainer"></div>
-          </section>
-
+          
           <!-- 毎日のクエスト -->
           <section
             class="daily-section"
@@ -569,28 +542,7 @@
             />
           </div>
 
-          <label class="boss-toggle">
-            <input
-              id="makeBoss"
-              name="isBoss"
-              type="checkbox"
-            />
 
-            <span
-              class="toggle-ui"
-              aria-hidden="true"
-            ></span>
-
-            <span>
-              <strong>
-                TODAY'S BOSS
-              </strong>
-
-              <small>
-                最重要タスクに設定
-              </small>
-            </span>
-          </label>
         </div>
 
         <!-- 毎日繰り返す設定 -->
