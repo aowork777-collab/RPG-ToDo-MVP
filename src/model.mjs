@@ -1,4 +1,9 @@
 import {
+  createDailyInitialState,
+  normalizeDailyState,
+} from "./features/daily/state.mjs";
+
+import {
   BOSS_REWARD,
   DIFFICULTY_REWARDS,
   XP_PER_LEVEL,
@@ -40,6 +45,7 @@ export function createDefaultState() {
     totalXp: 0,
     filter: "active",
     tasks: [],
+    daily: createDailyInitialState(),
   };
 }
 
@@ -64,6 +70,25 @@ export function normalizeTask(rawTask) {
     dueTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(String(rawTask.dueTime || ""))
       ? String(rawTask.dueTime)
       : "",
+          dailyTemplateId:
+      typeof rawTask.dailyTemplateId ===
+      "string"
+        ? rawTask.dailyTemplateId
+        : null,
+
+    dateKey:
+      /^\d{4}-\d{2}-\d{2}$/.test(
+        String(
+          rawTask.dateKey || "",
+        ),
+      )
+        ? String(rawTask.dateKey)
+        : null,
+
+    recurrence:
+      rawTask.recurrence === "daily"
+        ? "daily"
+        : null,
     isBoss,
     completed,
     reward,
@@ -93,8 +118,23 @@ export function normalizeState(rawState) {
 
   const allowedFilters = new Set(["active", "all", "completed"]);
   return {
-    totalXp: Math.max(0, Number.parseInt(rawState.totalXp, 10) || 0),
-    filter: allowedFilters.has(rawState.filter) ? rawState.filter : "active",
+    totalXp: Math.max(
+      0,
+      Number.parseInt(
+        rawState.totalXp,
+        10,
+      ) || 0,
+    ),
+
+    filter:
+      allowedFilters.has(rawState.filter)
+        ? rawState.filter
+        : "active",
+
     tasks,
+
+    daily: normalizeDailyState(
+      rawState.daily,
+    ),
   };
 }
