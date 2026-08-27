@@ -1,0 +1,285 @@
+.battle-section {
+  margin-top: 36px;
+}
+
+.battle-container {
+  width: 100%;
+}
+
+.battle-card {
+  display: grid;
+  gap: 24px;
+  padding: 28px;
+  overflow: hidden;
+  position: relative;
+}
+
+.battle-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 91, 91, 0.14),
+      transparent 38%
+    );
+}
+
+.battle-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  position: relative;
+}
+
+.battle-stat {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid
+    var(--color-border, #30343d);
+  border-radius: 12px;
+  background:
+    rgba(255, 255, 255, 0.03);
+}
+
+.battle-stat span {
+  color:
+    var(--color-text-muted, #9da3ae);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.battle-stat strong {
+  color:
+    var(--color-text, #f6f7f9);
+  font-size: 1.15rem;
+}
+
+.battle-enemy {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 150px;
+  padding: 22px;
+  position: relative;
+  border: 1px solid
+    rgba(255, 91, 91, 0.3);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 91, 91, 0.1),
+      rgba(255, 255, 255, 0.02)
+    );
+}
+
+.battle-enemy-icon {
+  display: grid;
+  place-items: center;
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
+  border-radius: 50%;
+  font-size: 3.5rem;
+  background:
+    rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 0 40px
+    rgba(255, 91, 91, 0.16);
+}
+
+.battle-enemy-info {
+  display: grid;
+  gap: 5px;
+}
+
+.battle-enemy-label {
+  color: #ff7272;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.battle-enemy-info h3 {
+  margin: 0;
+  color:
+    var(--color-text, #f6f7f9);
+  font-size: clamp(
+    1.45rem,
+    4vw,
+    2rem
+  );
+}
+
+.battle-enemy-info p {
+  margin: 0;
+  color:
+    var(--color-text-muted, #9da3ae);
+}
+
+.battle-enemy-reward {
+  margin-top: 7px;
+  color: #ffd166;
+  font-size: 0.85rem;
+}
+
+.battle-button {
+  width: 100%;
+  min-height: 52px;
+  position: relative;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.battle-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.battle-result {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  position: relative;
+  border-radius: 14px;
+  background:
+    rgba(0, 0, 0, 0.18);
+}
+
+.battle-result.victory {
+  border: 1px solid
+    rgba(66, 211, 146, 0.35);
+}
+
+.battle-result.defeat {
+  border: 1px solid
+    rgba(255, 91, 91, 0.35);
+}
+
+.battle-result-title {
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+}
+
+.battle-result.victory
+.battle-result-title {
+  color: #42d392;
+}
+
+.battle-result.defeat
+.battle-result-title {
+  color: #ff7272;
+}
+
+.battle-result-reward {
+  color: #ffd166;
+  font-weight: 700;
+}
+
+.battle-result-hp {
+  display: grid;
+  gap: 12px;
+}
+
+.battle-hp {
+  display: grid;
+  gap: 6px;
+}
+
+.battle-hp-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color:
+    var(--color-text-muted, #9da3ae);
+  font-size: 0.75rem;
+}
+
+.battle-hp-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    rgba(255, 255, 255, 0.08);
+}
+
+.battle-hp-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition:
+    width 300ms ease;
+}
+
+.battle-hp-bar.player {
+  background: #42d392;
+}
+
+.battle-hp-bar.enemy {
+  background: #ff5b5b;
+}
+
+.battle-log-title {
+  margin: 4px 0 0;
+  color:
+    var(--color-text-muted, #9da3ae);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.battle-log {
+  display: grid;
+  gap: 7px;
+  max-height: 220px;
+  margin: 0;
+  padding:
+    14px 14px 14px 34px;
+  overflow-y: auto;
+  border-radius: 10px;
+  color:
+    var(--color-text-muted, #b5bac4);
+  background:
+    rgba(0, 0, 0, 0.2);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (
+  max-width: 720px
+) {
+  .battle-card {
+    padding: 20px;
+  }
+
+  .battle-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-enemy {
+    align-items: flex-start;
+  }
+
+  .battle-enemy-icon {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+    font-size: 2.5rem;
+  }
+}
+
+@media (
+  max-width: 440px
+) {
+  .battle-enemy {
+    flex-direction: column;
+  }
+
+  .battle-stats {
+    grid-template-columns: 1fr;
+  }
+}

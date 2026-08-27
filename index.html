@@ -15,7 +15,7 @@
 
     <meta
       name="description"
-      content="今日のタスクをクエストに変える、LEVEL + XPに絞ったRPG ToDo。"
+      content="タスクを達成してレベルを上げ、現在のレベルで戦うRPG ToDo。"
     />
 
     <title>RPG ToDo</title>
@@ -56,12 +56,19 @@
       href="./styles/feedback.css"
     />
 
-    <!-- 毎日タスク機能 -->
+    <!-- 毎日タスク -->
     <link
       rel="stylesheet"
       href="./src/features/daily/daily.css"
     />
 
+    <!-- 戦闘機能 -->
+    <link
+      rel="stylesheet"
+      href="./src/features/battle/battle.css"
+    />
+
+    <!-- スマートフォン対応 -->
     <link
       rel="stylesheet"
       href="./styles/responsive.css"
@@ -100,8 +107,13 @@
           </span>
 
           <span>
-            <strong>RPG TODO</strong>
-            <small>DAILY QUEST BOARD</small>
+            <strong>
+              RPG TODO
+            </strong>
+
+            <small>
+              DAILY QUEST BOARD
+            </small>
           </span>
         </a>
 
@@ -163,7 +175,9 @@
                 class="avatar"
                 aria-hidden="true"
               >
-                <span>YOU</span>
+                <span>
+                  YOU
+                </span>
               </div>
 
               <div>
@@ -196,7 +210,9 @@
                   0
                 </strong>
 
-                <span>/ 100 XP</span>
+                <span>
+                  / 100 XP
+                </span>
               </div>
             </div>
 
@@ -252,7 +268,9 @@
 
             <ol>
               <li>
-                <span>01</span>
+                <span>
+                  01
+                </span>
 
                 <p>
                   今日やることを
@@ -265,27 +283,31 @@
               </li>
 
               <li>
-                <span>02</span>
+                <span>
+                  02
+                </span>
 
                 <p>
-                  最重要タスクを
+                  クエストを完了して
                   <br />
 
                   <strong>
-                    ボスに指定
+                    XPを獲得
                   </strong>
                 </p>
               </li>
 
               <li>
-                <span>03</span>
+                <span>
+                  03
+                </span>
 
                 <p>
-                  完了してXPを獲得
+                  成長したレベルで
                   <br />
 
                   <strong>
-                    レベルアップ
+                    敵と戦う
                   </strong>
                 </p>
               </li>
@@ -295,7 +317,6 @@
 
         <!-- メインコンテンツ -->
         <div class="main-column">
-          
           <!-- 毎日のクエスト -->
           <section
             class="daily-section"
@@ -384,6 +405,33 @@
               id="questList"
             ></div>
           </section>
+
+          <!-- 戦闘機能 -->
+          <section
+            class="battle-section"
+            aria-labelledby="battleTitle"
+          >
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow danger">
+                  COMBAT MODE
+                </p>
+
+                <h2 id="battleTitle">
+                  BATTLE ARENA
+                </h2>
+              </div>
+
+              <span class="section-tag">
+                LEVEL BATTLE
+              </span>
+            </div>
+
+            <div
+              id="battleContainer"
+              class="battle-container"
+            ></div>
+          </section>
         </div>
       </main>
 
@@ -394,7 +442,7 @@
         </span>
 
         <span>
-          DATA SAVED ON THIS DEVICE
+          TASK / LEVEL / BATTLE
         </span>
       </footer>
     </div>
@@ -524,7 +572,7 @@
           </div>
         </fieldset>
 
-        <!-- 期限・ボス設定 -->
+        <!-- 期限 -->
         <div class="form-row">
           <div>
             <label
@@ -541,11 +589,9 @@
               type="time"
             />
           </div>
-
-
         </div>
 
-        <!-- 毎日繰り返す設定 -->
+        <!-- 毎日繰り返す -->
         <label class="daily-repeat-option">
           <input
             id="repeatDaily"
@@ -609,7 +655,9 @@
       id="levelFlash"
       aria-hidden="true"
     >
-      <p>LEVEL UP!</p>
+      <p>
+        LEVEL UP!
+      </p>
 
       <strong id="levelFlashNumber">
         2

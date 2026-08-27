@@ -5,6 +5,11 @@ import {
 } from "./actions.mjs";
 
 import {
+  renderBattle,
+  startBattle,
+} from "./features/battle/index.mjs";
+
+import {
   addDailyTemplate,
   generateTodayTasks,
   removeDailyTemplate,
@@ -13,8 +18,14 @@ import {
   toggleDailyTemplate,
 } from "./features/daily/index.mjs";
 
-import { createDefaultState } from "./model.mjs";
-import { loadState, saveState } from "./storage.mjs";
+import {
+  createDefaultState,
+} from "./model.mjs";
+
+import {
+  loadState,
+  saveState,
+} from "./storage.mjs";
 
 import {
   closeQuestDialog,
@@ -28,8 +39,13 @@ import {
   showToast,
 } from "./ui/feedback.mjs";
 
-import { setText } from "./ui/helpers.mjs";
-import { renderProfile } from "./ui/profile.mjs";
+import {
+  setText,
+} from "./ui/helpers.mjs";
+
+import {
+  renderProfile,
+} from "./ui/profile.mjs";
 
 import {
   renderFilters,
@@ -55,34 +71,49 @@ function persist() {
 }
 
 function updateTodayLabel() {
-  const today = new Intl.DateTimeFormat(
-    "ja-JP",
-    {
-      month: "long",
-      day: "numeric",
-      weekday: "short",
-    },
-  ).format(new Date());
+  const today =
+    new Intl.DateTimeFormat(
+      "ja-JP",
+      {
+        month: "long",
+        day: "numeric",
+        weekday: "short",
+      },
+    ).format(new Date());
 
-  setText(elements.todayLabel, today);
+  setText(
+    elements.todayLabel,
+    today,
+  );
 }
 
 function render() {
   const questActions = {
-    toggleTask: handleToggleTask,
-    deleteTask: handleDeleteTask,
-    openQuest: handleOpenQuest,
+    toggleTask:
+      handleToggleTask,
+
+    deleteTask:
+      handleDeleteTask,
+
+    openQuest:
+      handleOpenQuest,
   };
 
-  renderProfile(elements, state);
+  renderProfile(
+    elements,
+    state,
+  );
 
   renderDailyList(
     elements,
     state,
     {
-      openCreate: handleOpenDailyQuest,
+      openCreate:
+        handleOpenDailyQuest,
+
       toggleTemplate:
         handleToggleDailyTemplate,
+
       deleteTemplate:
         handleDeleteDailyTemplate,
     },
@@ -94,14 +125,29 @@ function render() {
     questActions,
   );
 
-  renderFilters(elements, state);
+  renderBattle(
+    elements,
+    state,
+    {
+      startBattle:
+        handleStartBattle,
+    },
+  );
+
+  renderFilters(
+    elements,
+    state,
+  );
 }
 
-function handleToggleTask(taskId) {
-  const result = toggleTaskState(
-    state,
-    taskId,
-  );
+function handleToggleTask(
+  taskId,
+) {
+  const result =
+    toggleTaskState(
+      state,
+      taskId,
+    );
 
   if (!result) {
     return;
@@ -149,25 +195,32 @@ function handleToggleTask(taskId) {
   }
 }
 
-function handleDeleteTask(taskId) {
-  const task = state.tasks.find(
-    (candidate) =>
-      candidate.id === taskId,
-  );
+function handleDeleteTask(
+  taskId,
+) {
+  const task =
+    state.tasks.find(
+      (candidate) =>
+        candidate.id === taskId,
+    );
 
   if (!task) {
     return;
   }
 
-  const confirmed = window.confirm(
-    `「${task.title}」をクエストログから削除しますか？`,
-  );
+  const confirmed =
+    window.confirm(
+      `「${task.title}」をクエストログから削除しますか？`,
+    );
 
   if (!confirmed) {
     return;
   }
 
-  removeTask(state, taskId);
+  removeTask(
+    state,
+    taskId,
+  );
 
   persist();
   render();
@@ -185,22 +238,38 @@ function handleDeleteTask(taskId) {
   );
 }
 
-function handleAddTask(formData) {
+function handleAddTask(
+  formData,
+) {
   const isDaily =
-    formData.get("repeatDaily") ===
-    "on";
+    formData.get(
+      "repeatDaily",
+    ) === "on";
 
+  /*
+   * 毎日タスクとして登録
+   */
   if (isDaily) {
-    const result = addDailyTemplate(
-      state,
-      {
-        title: formData.get("title"),
-        difficulty:
-          formData.get("difficulty"),
-        dueTime:
-          formData.get("dueTime"),
-      },
-    );
+    const result =
+      addDailyTemplate(
+        state,
+        {
+          title:
+            formData.get(
+              "title",
+            ),
+
+          difficulty:
+            formData.get(
+              "difficulty",
+            ),
+
+          dueTime:
+            formData.get(
+              "dueTime",
+            ),
+        },
+      );
 
     if (!result) {
       return;
@@ -208,7 +277,10 @@ function handleAddTask(formData) {
 
     persist();
     render();
-    closeQuestDialog(elements);
+
+    closeQuestDialog(
+      elements,
+    );
 
     announce(
       elements,
@@ -229,16 +301,29 @@ function handleAddTask(formData) {
     return;
   }
 
-  const task = addTask(
-    state,
-    {
-      title: formData.get("title"),
-      difficulty:
-        formData.get("difficulty"),
-      dueTime:
-        formData.get("dueTime"),
-    },
-  );
+  /*
+   * 通常タスクとして登録
+   */
+  const task =
+    addTask(
+      state,
+      {
+        title:
+          formData.get(
+            "title",
+          ),
+
+        difficulty:
+          formData.get(
+            "difficulty",
+          ),
+
+        dueTime:
+          formData.get(
+            "dueTime",
+          ),
+      },
+    );
 
   if (!task) {
     return;
@@ -246,7 +331,10 @@ function handleAddTask(formData) {
 
   persist();
   render();
-  closeQuestDialog(elements);
+
+  closeQuestDialog(
+    elements,
+  );
 
   announce(
     elements,
@@ -262,23 +350,83 @@ function handleAddTask(formData) {
 }
 
 function handleOpenQuest() {
-  openQuestDialog(elements);
+  openQuestDialog(
+    elements,
+  );
 
-  if (elements.repeatDaily) {
+  if (
+    elements.repeatDaily
+  ) {
     elements.repeatDaily.checked =
       false;
   }
 
-  updateRewardPreview(elements);
+  updateRewardPreview(
+    elements,
+  );
 }
 
 function handleOpenDailyQuest() {
-  openQuestDialog(elements);
+  openQuestDialog(
+    elements,
+  );
 
   elements.repeatDaily.checked =
     true;
 
-  updateRewardPreview(elements);
+  updateRewardPreview(
+    elements,
+  );
+}
+
+function handleStartBattle(
+  enemyId,
+) {
+  const result =
+    startBattle(
+      state,
+      {
+        enemyId,
+      },
+    );
+
+  if (!result) {
+    return;
+  }
+
+  /*
+   * 戦闘結果とGOLDを保存
+   */
+  persist();
+  render();
+
+  if (result.victory) {
+    announce(
+      elements,
+      `${result.enemyName}に勝利し、${result.goldEarned}ゴールドを獲得しました`,
+    );
+
+    showToast(
+      elements,
+      "VICTORY!",
+      `+${result.goldEarned} GOLD`,
+      "⚔",
+    );
+
+    return;
+  }
+
+  announce(
+    elements,
+    `${result.enemyName}との戦闘に敗北しました`,
+  );
+
+  showToast(
+    elements,
+    "DEFEAT",
+    "GOLDは失いません",
+    "×",
+  );
 }
 
 function handleToggleDailyTemplate(
@@ -318,18 +466,22 @@ function handleDeleteDailyTemplate(
   templateId,
 ) {
   const template =
-    state.daily?.templates.find(
-      (item) =>
-        item.id === templateId,
-    );
+    state.daily
+      ?.templates
+      .find(
+        (item) =>
+          item.id ===
+          templateId,
+      );
 
   if (!template) {
     return;
   }
 
-  const confirmed = window.confirm(
-    `「${template.title}」の毎日設定を削除しますか？`,
-  );
+  const confirmed =
+    window.confirm(
+      `「${template.title}」の毎日設定を削除しますか？`,
+    );
 
   if (!confirmed) {
     return;
@@ -356,9 +508,18 @@ function handleDeleteDailyTemplate(
   );
 }
 
-function handleDailyDateChange({
-  dateKey,
-}) {
+function handleDailyDateChange(
+  value,
+) {
+  /*
+   * scheduler.mjsの実装差に対応して、
+   * 文字列とオブジェクトの両方を受け取る
+   */
+  const dateKey =
+    typeof value === "string"
+      ? value
+      : value?.dateKey;
+
   const result =
     generateTodayTasks(
       state,
@@ -370,7 +531,8 @@ function handleDailyDateChange({
   render();
 
   if (
-    result.createdTasks.length > 0
+    result.createdTasks.length >
+    0
   ) {
     showToast(
       elements,
@@ -382,17 +544,24 @@ function handleDailyDateChange({
 }
 
 function handleReset() {
-  const confirmed = window.confirm(
-    "レベル・XP・クエスト・毎日タスクをすべてリセットしますか？",
-  );
+  const confirmed =
+    window.confirm(
+      "レベル・XP・クエスト・毎日タスク・戦闘記録をすべてリセットしますか？",
+    );
 
   if (!confirmed) {
     return;
   }
 
-  state = createDefaultState();
+  /*
+   * battleを含むすべての状態を初期化
+   */
+  state =
+    createDefaultState();
 
-  generateTodayTasks(state);
+  generateTodayTasks(
+    state,
+  );
 
   persist();
   render();
@@ -405,7 +574,7 @@ function handleReset() {
   showToast(
     elements,
     "データをリセットしました",
-    "LEVEL 1 / 0 XP",
+    "LEVEL 1 / 0 XP / 0 GOLD",
     "↺",
   );
 }
@@ -457,11 +626,12 @@ function cacheElements() {
         "questList",
       ),
 
-    filterTabs: Array.from(
-      document.querySelectorAll(
-        ".filter-tab",
+    filterTabs:
+      Array.from(
+        document.querySelectorAll(
+          ".filter-tab",
+        ),
       ),
-    ),
 
     openQuestButton:
       document.getElementById(
@@ -542,6 +712,11 @@ function cacheElements() {
       document.getElementById(
         "repeatDaily",
       ),
+
+    battleContainer:
+      document.getElementById(
+        "battleContainer",
+      ),
   };
 }
 
@@ -567,22 +742,30 @@ function bindEvents() {
   elements.closeDialogButton
     .addEventListener(
       "click",
-      () =>
-        closeQuestDialog(elements),
+      () => {
+        closeQuestDialog(
+          elements,
+        );
+      },
     );
 
   elements.cancelDialogButton
     .addEventListener(
       "click",
-      () =>
-        closeQuestDialog(elements),
+      () => {
+        closeQuestDialog(
+          elements,
+        );
+      },
     );
 
   elements.repeatDaily
     .addEventListener(
       "change",
       () => {
-        updateRewardPreview(elements);
+        updateRewardPreview(
+          elements,
+        );
       },
     );
 
@@ -590,7 +773,9 @@ function bindEvents() {
     .addEventListener(
       "change",
       () => {
-        updateRewardPreview(elements);
+        updateRewardPreview(
+          elements,
+        );
       },
     );
 
@@ -605,7 +790,9 @@ function bindEvents() {
             elements.questForm,
           );
 
-        handleAddTask(formData);
+        handleAddTask(
+          formData,
+        );
       },
     );
 
@@ -617,7 +804,9 @@ function bindEvents() {
           event.target ===
           elements.questDialog
         ) {
-          closeQuestDialog(elements);
+          closeQuestDialog(
+            elements,
+          );
         }
       },
     );
@@ -638,6 +827,7 @@ function bindEvents() {
             {
               toggleTask:
                 handleToggleTask,
+
               deleteTask:
                 handleDeleteTask,
             },
@@ -656,16 +846,28 @@ function bindEvents() {
 function init() {
   cacheElements();
 
-  state = loadState();
+  state =
+    loadState();
 
-  generateTodayTasks(state);
+  /*
+   * 今日の毎日タスクを生成
+   */
+  generateTodayTasks(
+    state,
+  );
 
   updateTodayLabel();
   bindEvents();
 
+  /*
+   * battleを含む状態を保存して描画
+   */
   persist();
   render();
 
+  /*
+   * 日付変更を監視
+   */
   startDailyScheduler({
     onDateChange:
       handleDailyDateChange,
