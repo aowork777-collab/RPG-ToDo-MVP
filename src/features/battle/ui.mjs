@@ -1,144 +1,126 @@
 import {
-  getBattlePlayerLevel,
-} from "./actions.mjs";
+  BATTLE_SKILLS,
+} from "./skills.mjs";
 
 import {
-  selectEnemyForLevel,
-} from "./enemies.mjs";
+  getAvailableBattleLevels,
+  getBattleStage,
+} from "./stages.mjs";
 
 import {
   ensureBattleState,
 } from "./state.mjs";
 
-function createElement(
+function element(
   tagName,
   className = "",
   text = "",
 ) {
-  const element =
+  const node =
     document.createElement(
       tagName,
     );
 
   if (className) {
-    element.className =
+    node.className =
       className;
   }
 
-  if (text) {
-    element.textContent =
+  if (text !== "") {
+    node.textContent =
       text;
   }
 
-  return element;
+  return node;
 }
 
-function createStat(
+function stat(
   label,
   value,
 ) {
-  const stat =
-    createElement(
+  const node =
+    element(
       "div",
-      "battle-stat",
+      "battle-page-stat",
     );
 
-  const labelElement =
-    createElement(
+  node.append(
+    element(
       "span",
       "",
       label,
-    );
+    ),
 
-  const valueElement =
-    createElement(
+    element(
       "strong",
       "",
       String(value),
-    );
-
-  stat.append(
-    labelElement,
-    valueElement,
-  );
-
-  return stat;
-}
-
-function calculateHpRate(
-  remainingHp,
-  maxHp,
-) {
-  if (maxHp <= 0) {
-    return 0;
-  }
-
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(
-        (remainingHp /
-          maxHp) *
-          100,
-      ),
     ),
   );
+
+  return node;
 }
 
-function createHpBar({
+function meter(
   label,
-  remainingHp,
-  maxHp,
-  enemy = false,
-}) {
+  current,
+  max,
+  type,
+) {
   const wrapper =
-    createElement(
+    element(
       "div",
-      "battle-hp",
+      "combat-meter",
     );
 
   const copy =
-    createElement(
+    element(
       "div",
-      "battle-hp-copy",
+      "combat-meter-copy",
     );
 
-  const name =
-    createElement(
+  copy.append(
+    element(
       "span",
       "",
       label,
-    );
+    ),
 
-  const value =
-    createElement(
+    element(
       "strong",
       "",
-      `${remainingHp} / ${maxHp}`,
-    );
-
-  copy.append(name, value);
+      `${current} / ${max}`,
+    ),
+  );
 
   const track =
-    createElement(
+    element(
       "div",
-      "battle-hp-track",
+      "combat-meter-track",
     );
 
   const bar =
-    createElement(
+    element(
       "span",
-      enemy
-        ? "battle-hp-bar enemy"
-        : "battle-hp-bar player",
+      `combat-meter-bar ${type}`,
     );
 
+  const percent =
+    max > 0
+      ? Math.max(
+          0,
+          Math.min(
+            100,
+            (
+              current /
+              max
+            ) * 100,
+          ),
+        )
+      : 0;
+
   bar.style.width =
-    `${calculateHpRate(
-      remainingHp,
-      maxHp,
-    )}%`;
+    `${percent}%`;
 
   track.append(bar);
 
@@ -150,266 +132,558 @@ function createHpBar({
   return wrapper;
 }
 
-function createResultPanel(result) {
+function renderStageSelection(
+  root,
+  battle,
+  playerLevel,
+  actions,
+) {
+  const stage =
+    getBattleStage(
+      battle.selectedBattleLevel,
+    );
+
   const panel =
-    createElement(
+    element(
       "section",
-      result.victory
-        ? "battle-result victory"
-        : "battle-result defeat",
-    );
-
-  const title =
-    createElement(
-      "strong",
-      "battle-result-title",
-      result.victory
-        ? "VICTORY!"
-        : "DEFEAT",
-    );
-
-  const reward =
-    createElement(
-      "span",
-      "battle-result-reward",
-      result.victory
-        ? `+${result.goldEarned} GOLD`
-        : "GOLDは失いません",
+      "battle-select-panel battle-panel",
     );
 
   panel.append(
-    title,
-    reward,
-  );
-
-  const hpArea =
-    createElement(
-      "div",
-      "battle-result-hp",
-    );
-
-  hpArea.append(
-    createHpBar({
-      label: "YOU",
-      remainingHp:
-        result.playerHpRemaining,
-      maxHp:
-        result.playerMaxHp,
-    }),
-
-    createHpBar({
-      label:
-        result.enemyName,
-      remainingHp:
-        result.enemyHpRemaining,
-      maxHp:
-        result.enemyMaxHp,
-      enemy: true,
-    }),
-  );
-
-  panel.append(hpArea);
-
-  const logTitle =
-    createElement(
+    element(
       "p",
-      "battle-log-title",
-      `BATTLE LOG / ${result.turns} TURN`,
+      "battle-kicker",
+      "SELECT BATTLE LEVEL",
+    ),
+  );
+
+  panel.append(
+    element(
+      "h1",
+      "",
+      "戦うレベルを選択",
+    ),
+  );
+
+  const select =
+    element(
+      "select",
+      "battle-level-select",
     );
 
-  const logList =
-    createElement(
-      "ol",
-      "battle-log",
-    );
+  select.setAttribute(
+    "aria-label",
+    "バトルレベルを選択",
+  );
 
-  result.log.forEach(
-    (line) => {
-      const item =
-        createElement(
-          "li",
+  getAvailableBattleLevels(
+    playerLevel,
+  ).forEach(
+    (level) => {
+      const option =
+        element(
+          "option",
           "",
-          line,
+          `BATTLE LEVEL ${level}`,
         );
 
-      logList.append(item);
+      option.value =
+        String(level);
+
+      option.selected =
+        level ===
+        battle.selectedBattleLevel;
+
+      select.append(
+        option,
+      );
     },
   );
 
-  panel.append(
-    logTitle,
-    logList,
+  select.addEventListener(
+    "change",
+    () => {
+      actions.selectLevel(
+        Number(
+          select.value,
+        ),
+      );
+    },
   );
 
-  return panel;
+  const preview =
+    element(
+      "div",
+      "stage-preview",
+    );
+
+  preview.append(
+    element(
+      "div",
+      "stage-enemy-icon",
+      stage.enemyIcon,
+    ),
+
+    element(
+      "h2",
+      "",
+      stage.enemyName,
+    ),
+
+    element(
+      "p",
+      "",
+      `ENEMY LEVEL ${stage.level}`,
+    ),
+
+    element(
+      "strong",
+      "stage-reward",
+      `勝利報酬 +${stage.goldReward} GOLD`,
+    ),
+  );
+
+  const startButton =
+    element(
+      "button",
+      "primary-button battle-start-button",
+      "⚔ 戦闘開始",
+    );
+
+  startButton.type =
+    "button";
+
+  startButton.addEventListener(
+    "click",
+    actions.startBattle,
+  );
+
+  panel.append(
+    select,
+    preview,
+    startButton,
+  );
+
+  root.append(
+    panel,
+  );
 }
 
-export function renderBattle(
-  elements,
-  state,
+function renderCombat(
+  root,
+  current,
   actions,
 ) {
-  const container =
-    elements.battleContainer;
+  const panel =
+    element(
+      "section",
+      "combat-panel battle-panel",
+    );
 
-  if (!container) {
+  const turnText =
+    current.status ===
+    "playing"
+      ? `TURN ${current.turn} / YOUR TURN`
+      : current.status.toUpperCase();
+
+  const turn =
+    element(
+      "div",
+      "combat-turn",
+      turnText,
+    );
+
+  const fighters =
+    element(
+      "div",
+      "combat-fighters",
+    );
+
+  /*
+   * プレイヤー
+   */
+  const playerCard =
+    element(
+      "article",
+      "fighter-card player-fighter",
+    );
+
+  playerCard.append(
+    element(
+      "p",
+      "fighter-label",
+      `PLAYER LEVEL ${current.player.level}`,
+    ),
+
+    element(
+      "h2",
+      "",
+      "YOU",
+    ),
+
+    meter(
+      "HP",
+      current.player.hp,
+      current.player.maxHp,
+      "hp-player",
+    ),
+
+    meter(
+      "MP",
+      current.player.mp,
+      current.player.maxMp,
+      "mp-player",
+    ),
+  );
+
+  /*
+   * 敵
+   */
+  const enemyCard =
+    element(
+      "article",
+      "fighter-card enemy-fighter",
+    );
+
+  enemyCard.append(
+    element(
+      "div",
+      "combat-enemy-icon",
+      current.enemy.icon,
+    ),
+
+    element(
+      "p",
+      "fighter-label",
+      `ENEMY LEVEL ${current.enemy.level}`,
+    ),
+
+    element(
+      "h2",
+      "",
+      current.enemy.name,
+    ),
+
+    meter(
+      "HP",
+      current.enemy.hp,
+      current.enemy.maxHp,
+      "hp-enemy",
+    ),
+  );
+
+  fighters.append(
+    playerCard,
+
+    element(
+      "div",
+      "combat-versus",
+      "VS",
+    ),
+
+    enemyCard,
+  );
+
+  panel.append(
+    turn,
+    fighters,
+  );
+
+  /*
+   * 戦闘中の技ボタン
+   */
+  if (
+    current.status ===
+    "playing"
+  ) {
+    const commandArea =
+      element(
+        "section",
+        "combat-commands",
+      );
+
+    commandArea.append(
+      element(
+        "p",
+        "battle-kicker",
+        "SELECT COMMAND",
+      ),
+    );
+
+    const buttons =
+      element(
+        "div",
+        "skill-grid",
+      );
+
+    BATTLE_SKILLS.forEach(
+      (skill) => {
+        const button =
+          element(
+            "button",
+            "skill-button",
+          );
+
+        button.type =
+          "button";
+
+        button.disabled =
+          current.phase !==
+            "player" ||
+          current.player.mp <
+            skill.mpCost;
+
+        button.append(
+          element(
+            "span",
+            "skill-icon",
+            skill.icon,
+          ),
+
+          element(
+            "strong",
+            "",
+            skill.name,
+          ),
+
+          element(
+            "small",
+            "",
+            skill.mpCost > 0
+              ? `MP ${skill.mpCost}`
+              : "MP 0",
+          ),
+
+          element(
+            "small",
+            "skill-description",
+            skill.description,
+          ),
+        );
+
+        button.addEventListener(
+          "click",
+          () => {
+            actions.useSkill(
+              skill.id,
+            );
+          },
+        );
+
+        buttons.append(
+          button,
+        );
+      },
+    );
+
+    commandArea.append(
+      buttons,
+    );
+
+    panel.append(
+      commandArea,
+    );
+  } else {
+    /*
+     * 戦闘終了
+     */
+    const resultText =
+      current.status ===
+      "victory"
+        ? `VICTORY! +${current.goldEarned} GOLD`
+        : "DEFEAT / GOLDは失いません";
+
+    const result =
+      element(
+        "section",
+        `combat-result ${current.status}`,
+        resultText,
+      );
+
+    const controls =
+      element(
+        "div",
+        "battle-result-actions",
+      );
+
+    const retry =
+      element(
+        "button",
+        "primary-button",
+        "もう一度戦う",
+      );
+
+    retry.type =
+      "button";
+
+    retry.addEventListener(
+      "click",
+      actions.retry,
+    );
+
+    const stages =
+      element(
+        "button",
+        "secondary-button",
+        "レベル選択へ戻る",
+      );
+
+    stages.type =
+      "button";
+
+    stages.addEventListener(
+      "click",
+      actions.returnToStages,
+    );
+
+    controls.append(
+      retry,
+      stages,
+    );
+
+    panel.append(
+      result,
+      controls,
+    );
+  }
+
+  /*
+   * 戦闘ログ
+   */
+  const logPanel =
+    element(
+      "section",
+      "combat-log-panel",
+    );
+
+  logPanel.append(
+    element(
+      "p",
+      "battle-kicker",
+      "BATTLE LOG",
+    ),
+  );
+
+  const log =
+    element(
+      "ol",
+      "combat-log",
+    );
+
+  current.log.forEach(
+    (line) => {
+      log.append(
+        element(
+          "li",
+          "",
+          line,
+        ),
+      );
+    },
+  );
+
+  logPanel.append(
+    log,
+  );
+
+  panel.append(
+    logPanel,
+  );
+
+  root.append(
+    panel,
+  );
+
+  log.scrollTop =
+    log.scrollHeight;
+}
+
+export function renderBattlePage(
+  root,
+  state,
+  options,
+) {
+  if (!root) {
     return;
   }
 
   const battle =
-    ensureBattleState(state);
-
-  const playerLevel =
-    getBattlePlayerLevel(
-      state.totalXp,
+    ensureBattleState(
+      state,
     );
 
-  const enemy =
-    selectEnemyForLevel(
+  const playerLevel =
+    Math.max(
+      1,
+      Math.floor(
+        Number(
+          options.playerLevel,
+        ) || 1,
+      ),
+    );
+
+  battle.selectedBattleLevel =
+    Math.min(
+      battle.selectedBattleLevel,
       playerLevel,
     );
 
-  container.replaceChildren();
+  root.replaceChildren();
 
-  const card =
-    createElement(
-      "article",
-      "battle-card panel",
+  /*
+   * 戦績
+   */
+  const status =
+    element(
+      "section",
+      "battle-page-status",
     );
 
-  const stats =
-    createElement(
-      "div",
-      "battle-stats",
-    );
-
-  stats.append(
-    createStat(
+  status.append(
+    stat(
       "PLAYER LEVEL",
       playerLevel,
     ),
 
-    createStat(
+    stat(
+      "GOLD",
+      battle.gold,
+    ),
+
+    stat(
       "WINS",
       battle.wins,
     ),
 
-    createStat(
+    stat(
       "LOSSES",
       battle.losses,
     ),
 
-    createStat(
-      "GOLD",
-      battle.gold,
+    stat(
+      "MAX CLEAR",
+      battle.highestClearedLevel,
     ),
   );
 
-  const enemyArea =
-    createElement(
-      "div",
-      "battle-enemy",
-    );
-
-  const enemyIcon =
-    createElement(
-      "div",
-      "battle-enemy-icon",
-      enemy.icon,
-    );
-
-  enemyIcon.setAttribute(
-    "aria-hidden",
-    "true",
+  root.append(
+    status,
   );
 
-  const enemyInfo =
-    createElement(
-      "div",
-      "battle-enemy-info",
+  if (
+    battle.currentBattle
+  ) {
+    renderCombat(
+      root,
+      battle.currentBattle,
+      options.actions,
     );
-
-  const enemyLabel =
-    createElement(
-      "span",
-      "battle-enemy-label",
-      "CURRENT ENEMY",
-    );
-
-  const enemyName =
-    createElement(
-      "h3",
-      "",
-      enemy.name,
-    );
-
-  const enemyLevel =
-    createElement(
-      "p",
-      "",
-      `ENEMY LEVEL ${enemy.level}`,
-    );
-
-  const enemyReward =
-    createElement(
-      "strong",
-      "battle-enemy-reward",
-      `REWARD +${enemy.goldReward} GOLD`,
-    );
-
-  enemyInfo.append(
-    enemyLabel,
-    enemyName,
-    enemyLevel,
-    enemyReward,
-  );
-
-  enemyArea.append(
-    enemyIcon,
-    enemyInfo,
-  );
-
-  const battleButton =
-    createElement(
-      "button",
-      "primary-button battle-button",
-      "⚔ 戦闘する",
-    );
-
-  battleButton.type =
-    "button";
-
-  const canBattle =
-    typeof actions?.startBattle ===
-    "function";
-
-  battleButton.disabled =
-    !canBattle;
-
-  if (canBattle) {
-    battleButton.addEventListener(
-      "click",
-      () => {
-        actions.startBattle(
-          enemy.id,
-        );
-      },
+  } else {
+    renderStageSelection(
+      root,
+      battle,
+      playerLevel,
+      options.actions,
     );
   }
-
-  card.append(
-    stats,
-    enemyArea,
-    battleButton,
-  );
-
-  if (battle.lastResult) {
-    card.append(
-      createResultPanel(
-        battle.lastResult,
-      ),
-    );
-  }
-
-  container.append(card);
 }

@@ -1,20 +1,31 @@
+function toInteger(
+  value,
+  fallback = 0,
+) {
+  const number =
+    Number(value);
+
+  return Number.isFinite(number)
+    ? Math.floor(number)
+    : fallback;
+}
+
 function toNonNegativeInteger(
   value,
   fallback = 0,
 ) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return fallback;
-  }
-
   return Math.max(
     0,
-    Math.floor(number),
+    toInteger(
+      value,
+      fallback,
+    ),
   );
 }
 
-function normalizeBattleLog(rawLog) {
+function normalizeLog(
+  rawLog,
+) {
   if (!Array.isArray(rawLog)) {
     return [];
   }
@@ -24,98 +35,204 @@ function normalizeBattleLog(rawLog) {
       (line) =>
         typeof line === "string",
     )
-    .slice(0, 60);
+    .slice(-80);
 }
 
-function normalizeLastResult(
-  rawResult,
+function normalizeFighter(
+  rawFighter,
+  fallbackName,
 ) {
   if (
-    !rawResult ||
-    typeof rawResult !== "object"
+    !rawFighter ||
+    typeof rawFighter !== "object"
   ) {
     return null;
   }
 
-  return {
-    victory:
-      Boolean(rawResult.victory),
+  const maxHp =
+    Math.max(
+      1,
+      toNonNegativeInteger(
+        rawFighter.maxHp,
+        1,
+      ),
+    );
 
-    enemyId:
-      typeof rawResult.enemyId ===
+  const maxMp =
+    toNonNegativeInteger(
+      rawFighter.maxMp,
+      0,
+    );
+
+  return {
+    id:
+      typeof rawFighter.id ===
       "string"
-        ? rawResult.enemyId
+        ? rawFighter.id
         : "",
 
-    enemyName:
-      typeof rawResult.enemyName ===
+    name:
+      typeof rawFighter.name ===
       "string"
-        ? rawResult.enemyName
-        : "UNKNOWN",
+        ? rawFighter.name
+        : fallbackName,
 
-    enemyIcon:
-      typeof rawResult.enemyIcon ===
+    icon:
+      typeof rawFighter.icon ===
       "string"
-        ? rawResult.enemyIcon
-        : "👾",
+        ? rawFighter.icon
+        : "",
 
-    enemyLevel:
+    level:
       Math.max(
         1,
         toNonNegativeInteger(
-          rawResult.enemyLevel,
+          rawFighter.level,
           1,
         ),
       ),
 
-    playerLevel:
+    hp:
+      Math.min(
+        maxHp,
+        toNonNegativeInteger(
+          rawFighter.hp,
+          maxHp,
+        ),
+      ),
+
+    maxHp,
+
+    mp:
+      Math.min(
+        maxMp,
+        toNonNegativeInteger(
+          rawFighter.mp,
+          maxMp,
+        ),
+      ),
+
+    maxMp,
+
+    attack:
       Math.max(
         1,
         toNonNegativeInteger(
-          rawResult.playerLevel,
+          rawFighter.attack,
           1,
         ),
       ),
 
-    playerMaxHp:
-      toNonNegativeInteger(
-        rawResult.playerMaxHp,
+    guarding:
+      Boolean(
+        rawFighter.guarding,
+      ),
+  };
+}
+
+function normalizeCurrentBattle(
+  rawBattle,
+) {
+  if (
+    !rawBattle ||
+    typeof rawBattle !== "object"
+  ) {
+    return null;
+  }
+
+  const player =
+    normalizeFighter(
+      rawBattle.player,
+      "YOU",
+    );
+
+  const enemy =
+    normalizeFighter(
+      rawBattle.enemy,
+      "ENEMY",
+    );
+
+  if (!player || !enemy) {
+    return null;
+  }
+
+  const allowedStatuses =
+    new Set([
+      "playing",
+      "victory",
+      "defeat",
+    ]);
+
+  const allowedPhases =
+    new Set([
+      "player",
+      "enemy",
+      "finished",
+    ]);
+
+  return {
+    status:
+      allowedStatuses.has(
+        rawBattle.status,
+      )
+        ? rawBattle.status
+        : "playing",
+
+    phase:
+      allowedPhases.has(
+        rawBattle.phase,
+      )
+        ? rawBattle.phase
+        : "player",
+
+    turn:
+      Math.max(
+        1,
+        toNonNegativeInteger(
+          rawBattle.turn,
+          1,
+        ),
       ),
 
-    playerHpRemaining:
-      toNonNegativeInteger(
-        rawResult.playerHpRemaining,
+    battleLevel:
+      Math.max(
+        1,
+        toNonNegativeInteger(
+          rawBattle.battleLevel,
+          1,
+        ),
       ),
 
-    enemyMaxHp:
+    goldReward:
       toNonNegativeInteger(
-        rawResult.enemyMaxHp,
-      ),
-
-    enemyHpRemaining:
-      toNonNegativeInteger(
-        rawResult.enemyHpRemaining,
-      ),
-
-    turns:
-      toNonNegativeInteger(
-        rawResult.turns,
+        rawBattle.goldReward,
+        0,
       ),
 
     goldEarned:
       toNonNegativeInteger(
-        rawResult.goldEarned,
+        rawBattle.goldEarned,
+        0,
       ),
+
+    player,
+    enemy,
 
     log:
-      normalizeBattleLog(
-        rawResult.log,
+      normalizeLog(
+        rawBattle.log,
       ),
 
-    foughtAt:
-      typeof rawResult.foughtAt ===
+    startedAt:
+      typeof rawBattle.startedAt ===
       "string"
-        ? rawResult.foughtAt
+        ? rawBattle.startedAt
+        : null,
+
+    finishedAt:
+      typeof rawBattle.finishedAt ===
+      "string"
+        ? rawBattle.finishedAt
         : null,
   };
 }
@@ -125,7 +242,9 @@ export function createBattleInitialState() {
     gold: 0,
     wins: 0,
     losses: 0,
-    lastResult: null,
+    highestClearedLevel: 0,
+    selectedBattleLevel: 1,
+    currentBattle: null,
   };
 }
 
@@ -146,21 +265,39 @@ export function normalizeBattleState(
     gold:
       toNonNegativeInteger(
         rawBattle.gold,
+        0,
       ),
 
     wins:
       toNonNegativeInteger(
         rawBattle.wins,
+        0,
       ),
 
     losses:
       toNonNegativeInteger(
         rawBattle.losses,
+        0,
       ),
 
-    lastResult:
-      normalizeLastResult(
-        rawBattle.lastResult,
+    highestClearedLevel:
+      toNonNegativeInteger(
+        rawBattle.highestClearedLevel,
+        0,
+      ),
+
+    selectedBattleLevel:
+      Math.max(
+        1,
+        toNonNegativeInteger(
+          rawBattle.selectedBattleLevel,
+          1,
+        ),
+      ),
+
+    currentBattle:
+      normalizeCurrentBattle(
+        rawBattle.currentBattle,
       ),
   };
 }

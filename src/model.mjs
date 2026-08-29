@@ -35,12 +35,9 @@ export function clampDifficulty(
 export function calculateTaskReward(
   difficulty,
 ) {
-  const normalizedDifficulty =
-    clampDifficulty(difficulty);
-
   return (
     DIFFICULTY_REWARDS[
-      normalizedDifficulty
+      clampDifficulty(difficulty)
     ] ?? 0
   );
 }
@@ -51,12 +48,13 @@ export function getProgress(
   const numericXp =
     Number(totalXp);
 
-  const safeXp = Math.max(
-    0,
-    Number.isFinite(numericXp)
-      ? Math.floor(numericXp)
-      : 0,
-  );
+  const safeXp =
+    Math.max(
+      0,
+      Number.isFinite(numericXp)
+        ? Math.floor(numericXp)
+        : 0,
+    );
 
   const level =
     Math.floor(
@@ -69,6 +67,7 @@ export function getProgress(
   return {
     level,
     currentXp,
+
     nextLevel:
       level + 1,
 
@@ -120,14 +119,13 @@ function normalizeDueTime(
   const dueTime =
     String(value || "");
 
-  const valid =
+  return (
     /^([01]\d|2[0-3]):[0-5]\d$/.test(
       dueTime,
-    );
-
-  return valid
-    ? dueTime
-    : "";
+    )
+      ? dueTime
+      : ""
+  );
 }
 
 function normalizeDateKey(
@@ -136,14 +134,13 @@ function normalizeDateKey(
   const dateKey =
     String(value || "");
 
-  const valid =
+  return (
     /^\d{4}-\d{2}-\d{2}$/.test(
       dateKey,
-    );
-
-  return valid
-    ? dateKey
-    : null;
+    )
+      ? dateKey
+      : null
+  );
 }
 
 function normalizeIsoDate(
@@ -159,15 +156,11 @@ function normalizeIsoDate(
   const date =
     new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
-    return fallback;
-  }
-
-  return date.toISOString();
+  return Number.isNaN(
+    date.getTime(),
+  )
+    ? fallback
+    : date.toISOString();
 }
 
 export function normalizeTask(
@@ -201,20 +194,11 @@ export function normalizeTask(
       rawTask.completed,
     );
 
-  /*
-   * BOSS報酬を残さないため、
-   * 未完了タスクの報酬は
-   * 難易度から再計算します。
-   */
   const reward =
     calculateTaskReward(
       difficulty,
     );
 
-  /*
-   * 完了済みタスクは、
-   * 過去に実際に獲得したXPを保持します。
-   */
   const rawEarnedXp =
     Number.parseInt(
       rawTask.earnedXp,
@@ -232,20 +216,6 @@ export function normalizeTask(
             : reward,
         )
       : 0;
-
-  const createdAt =
-    normalizeIsoDate(
-      rawTask.createdAt,
-      new Date().toISOString(),
-    );
-
-  const completedAt =
-    completed
-      ? normalizeIsoDate(
-          rawTask.completedAt,
-          new Date().toISOString(),
-        )
-      : null;
 
   return {
     id:
@@ -282,8 +252,20 @@ export function normalizeTask(
     completed,
     reward,
     earnedXp,
-    createdAt,
-    completedAt,
+
+    createdAt:
+      normalizeIsoDate(
+        rawTask.createdAt,
+        new Date().toISOString(),
+      ),
+
+    completedAt:
+      completed
+        ? normalizeIsoDate(
+            rawTask.completedAt,
+            new Date().toISOString(),
+          )
+        : null,
   };
 }
 

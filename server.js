@@ -20,7 +20,7 @@ const mimeTypes = new Map([
 function resolvePublicFile(pathname) {
   const decodedPath = decodeURIComponent(pathname);
   const relativePath = decodedPath === "/" ? "index.html" : decodedPath.replace(/^\/+/, "");
-  const isRootPage = relativePath === "index.html";
+  const isRootPage = ["index.html", "battle.html"].includes(relativePath);
   const isPublicAsset = relativePath.startsWith("src/") || relativePath.startsWith("styles/");
   const mimeType = mimeTypes.get(path.extname(relativePath));
 

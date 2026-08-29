@@ -15,7 +15,7 @@
 
     <meta
       name="description"
-      content="タスクを達成してレベルを上げ、現在のレベルで戦うRPG ToDo。"
+      content="タスクを達成してレベルを上げ、バトルに挑戦するRPG ToDo。"
     />
 
     <title>RPG ToDo</title>
@@ -62,7 +62,7 @@
       href="./src/features/daily/daily.css"
     />
 
-    <!-- 戦闘機能 -->
+    <!-- 戦闘画面へのリンク部分 -->
     <link
       rel="stylesheet"
       href="./src/features/battle/battle.css"
@@ -406,31 +406,29 @@
             ></div>
           </section>
 
-          <!-- 戦闘機能 -->
-          <section
-            class="battle-section"
-            aria-labelledby="battleTitle"
-          >
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow danger">
-                  COMBAT MODE
-                </p>
+          <!-- 戦闘画面へのリンク -->
+          <section class="battle-launch panel">
+            <div>
+              <p class="eyebrow danger">
+                COMBAT MODE
+              </p>
 
-                <h2 id="battleTitle">
-                  BATTLE ARENA
-                </h2>
-              </div>
+              <h2>
+                BATTLE ARENA
+              </h2>
 
-              <span class="section-tag">
-                LEVEL BATTLE
-              </span>
+              <p>
+                タスクで上げたLEVELを使って、
+                ターン制バトルに挑戦します。
+              </p>
             </div>
 
-            <div
-              id="battleContainer"
-              class="battle-container"
-            ></div>
+            <a
+              href="./battle.html"
+              class="primary-button"
+            >
+              ⚔ バトル画面へ
+            </a>
           </section>
         </div>
       </main>
@@ -442,7 +440,7 @@
         </span>
 
         <span>
-          TASK / LEVEL / BATTLE
+          DATA SAVED ON THIS DEVICE
         </span>
       </footer>
     </div>

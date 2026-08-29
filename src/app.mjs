@@ -5,11 +5,6 @@ import {
 } from "./actions.mjs";
 
 import {
-  renderBattle,
-  startBattle,
-} from "./features/battle/index.mjs";
-
-import {
   addDailyTemplate,
   generateTodayTasks,
   removeDailyTemplate,
@@ -125,15 +120,6 @@ function render() {
     questActions,
   );
 
-  renderBattle(
-    elements,
-    state,
-    {
-      startBattle:
-        handleStartBattle,
-    },
-  );
-
   renderFilters(
     elements,
     state,
@@ -246,9 +232,6 @@ function handleAddTask(
       "repeatDaily",
     ) === "on";
 
-  /*
-   * 毎日タスクとして登録
-   */
   if (isDaily) {
     const result =
       addDailyTemplate(
@@ -301,9 +284,6 @@ function handleAddTask(
     return;
   }
 
-  /*
-   * 通常タスクとして登録
-   */
   const task =
     addTask(
       state,
@@ -376,56 +356,6 @@ function handleOpenDailyQuest() {
 
   updateRewardPreview(
     elements,
-  );
-}
-
-function handleStartBattle(
-  enemyId,
-) {
-  const result =
-    startBattle(
-      state,
-      {
-        enemyId,
-      },
-    );
-
-  if (!result) {
-    return;
-  }
-
-  /*
-   * 戦闘結果とGOLDを保存
-   */
-  persist();
-  render();
-
-  if (result.victory) {
-    announce(
-      elements,
-      `${result.enemyName}に勝利し、${result.goldEarned}ゴールドを獲得しました`,
-    );
-
-    showToast(
-      elements,
-      "VICTORY!",
-      `+${result.goldEarned} GOLD`,
-      "⚔",
-    );
-
-    return;
-  }
-
-  announce(
-    elements,
-    `${result.enemyName}との戦闘に敗北しました`,
-  );
-
-  showToast(
-    elements,
-    "DEFEAT",
-    "GOLDは失いません",
-    "×",
   );
 }
 
@@ -511,10 +441,6 @@ function handleDeleteDailyTemplate(
 function handleDailyDateChange(
   value,
 ) {
-  /*
-   * scheduler.mjsの実装差に対応して、
-   * 文字列とオブジェクトの両方を受け取る
-   */
   const dateKey =
     typeof value === "string"
       ? value
@@ -553,9 +479,6 @@ function handleReset() {
     return;
   }
 
-  /*
-   * battleを含むすべての状態を初期化
-   */
   state =
     createDefaultState();
 
@@ -712,11 +635,6 @@ function cacheElements() {
       document.getElementById(
         "repeatDaily",
       ),
-
-    battleContainer:
-      document.getElementById(
-        "battleContainer",
-      ),
   };
 }
 
@@ -849,9 +767,6 @@ function init() {
   state =
     loadState();
 
-  /*
-   * 今日の毎日タスクを生成
-   */
   generateTodayTasks(
     state,
   );
@@ -859,15 +774,9 @@ function init() {
   updateTodayLabel();
   bindEvents();
 
-  /*
-   * battleを含む状態を保存して描画
-   */
   persist();
   render();
 
-  /*
-   * 日付変更を監視
-   */
   startDailyScheduler({
     onDateChange:
       handleDailyDateChange,

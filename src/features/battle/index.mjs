@@ -5,18 +5,25 @@ export {
 } from "./state.mjs";
 
 export {
-  ENEMIES,
-  getEnemyById,
-  getUnlockedEnemies,
-  selectEnemyForLevel,
-} from "./enemies.mjs";
+  MAX_BATTLE_LEVEL,
+  clampBattleLevel,
+  getAvailableBattleLevels,
+  getBattleStage,
+} from "./stages.mjs";
 
 export {
-  getBattlePlayerLevel,
-  resetBattleProgress,
+  BATTLE_SKILLS,
+  getBattleSkill,
+} from "./skills.mjs";
+
+export {
+  retryBattle,
+  returnToStageSelection,
+  selectBattleLevel,
   startBattle,
-} from "./actions.mjs";
+  useBattleSkill,
+} from "./engine.mjs";
 
 export {
-  renderBattle,
+  renderBattlePage,
 } from "./ui.mjs";

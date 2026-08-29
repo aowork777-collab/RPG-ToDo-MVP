@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      name="theme-color"
+      content="#111318"
+    />
+
+    <meta
+      name="description"
+      content="タスクで上げたレベルを使って戦うRPG ToDoのバトルアリーナ。"
+    />
+
+    <title>
+      BATTLE ARENA | RPG ToDo
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="./styles/tokens.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="./styles/base.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="./src/features/battle/battle.css"
+    />
+
+    <script
+      type="module"
+      src="./src/battle-app.mjs"
+    ></script>
+  </head>
+
+  <body class="battle-page-body">
+    <div class="battle-page-shell">
+      <header class="battle-page-header">
+        <a
+          class="battle-back-link"
+          href="./index.html"
+        >
+          ← QUEST BOARD
+        </a>
+
+        <div>
+          <p class="battle-kicker">
+            RPG TODO / COMBAT MODE
+          </p>
+
+          <strong>
+            BATTLE ARENA
+          </strong>
+        </div>
+      </header>
+
+      <main
+        id="battleApp"
+        class="battle-page-main"
+        aria-live="polite"
+      ></main>
+
+      <footer class="battle-page-footer">
+        <span>
+          PLAYER LEVEL IS EARNED FROM TASKS
+        </span>
+
+        <a href="./index.html">
+          タスク画面へ戻る
+        </a>
+      </footer>
+    </div>
+  </body>
+</html>
