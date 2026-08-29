@@ -1,63 +1,58 @@
-export const MAX_BATTLE_LEVEL =
-  99;
+export const MAX_BATTLE_LEVEL = 99;
 
-const ENEMY_TIERS =
-  Object.freeze([
-    Object.freeze({
-      minLevel: 1,
-      id: "slime",
-      name: "スライム",
-      icon: "🟢",
-    }),
+const ENEMY_TIERS = Object.freeze([
+  Object.freeze({
+    minLevel: 1,
+    id: "slime",
+    name: "スライム",
+    icon: "🟢",
+  }),
 
-    Object.freeze({
-      minLevel: 3,
-      id: "goblin",
-      name: "ゴブリン",
-      icon: "👺",
-    }),
+  Object.freeze({
+    minLevel: 3,
+    id: "goblin",
+    name: "ゴブリン",
+    icon: "👺",
+  }),
 
-    Object.freeze({
-      minLevel: 5,
-      id: "wolf",
-      name: "ワイルドウルフ",
-      icon: "🐺",
-    }),
+  Object.freeze({
+    minLevel: 5,
+    id: "wolf",
+    name: "ワイルドウルフ",
+    icon: "🐺",
+  }),
 
-    Object.freeze({
-      minLevel: 7,
-      id: "skeleton",
-      name: "スケルトン",
-      icon: "💀",
-    }),
+  Object.freeze({
+    minLevel: 7,
+    id: "skeleton",
+    name: "スケルトン",
+    icon: "💀",
+  }),
 
-    Object.freeze({
-      minLevel: 10,
-      id: "orc",
-      name: "オーク",
-      icon: "👹",
-    }),
+  Object.freeze({
+    minLevel: 10,
+    id: "orc",
+    name: "オーク",
+    icon: "👹",
+  }),
 
-    Object.freeze({
-      minLevel: 15,
-      id: "demon",
-      name: "デーモン",
-      icon: "😈",
-    }),
+  Object.freeze({
+    minLevel: 15,
+    id: "demon",
+    name: "デーモン",
+    icon: "😈",
+  }),
 
-    Object.freeze({
-      minLevel: 20,
-      id: "dragon",
-      name: "ドラゴン",
-      icon: "🐉",
-    }),
-  ]);
+  Object.freeze({
+    minLevel: 20,
+    id: "dragon",
+    name: "ドラゴン",
+    icon: "🐉",
+  }),
+]);
 
-function normalizeLevel(
-  value,
-) {
-  const number =
-    Number(value);
+function normalizeLevel(value) {
+  const number = Number(value);
 
   if (!Number.isFinite(number)) {
     return 1;
@@ -72,45 +67,29 @@ function normalizeLevel(
   );
 }
 
-function getEnemyTier(
-  level,
-) {
+function getEnemyTier(level) {
   return ENEMY_TIERS.reduce(
-    (
-      selected,
-      tier,
-    ) =>
-      tier.minLevel <= level
+    (selected, tier) => {
+      return tier.minLevel <= level
         ? tier
-        : selected,
-
+        : selected;
+    },
     ENEMY_TIERS[0],
   );
 }
 
-export function getBattleStage(
-  level,
-) {
-  const battleLevel =
-    normalizeLevel(level);
-
-  const tier =
-    getEnemyTier(
-      battleLevel,
-    );
+export function getBattleStage(level) {
+  const battleLevel = normalizeLevel(level);
+  const tier = getEnemyTier(battleLevel);
 
   return {
-    level:
-      battleLevel,
+    level: battleLevel,
 
-    enemyId:
-      `${tier.id}-level-${battleLevel}`,
+    enemyId: `${tier.id}-level-${battleLevel}`,
 
-    enemyName:
-      tier.name,
+    enemyName: tier.name,
 
-    enemyIcon:
-      tier.icon,
+    enemyIcon: tier.icon,
 
     enemyMaxHp:
       45 +
@@ -126,43 +105,23 @@ export function getBattleStage(
   };
 }
 
-export function getAvailableBattleLevels(
-  playerLevel,
-) {
-  const maxLevel =
-    normalizeLevel(
-      playerLevel,
-    );
-
+/*
+ * PLAYER LEVELに関係なく、
+ * BATTLE LEVEL 1〜99を選択可能にします。
+ */
+export function getAvailableBattleLevels() {
   return Array.from(
     {
-      length: maxLevel,
+      length: MAX_BATTLE_LEVEL,
     },
-
-    (
-      _,
-      index,
-    ) =>
-      index + 1,
+    (_, index) => index + 1,
   );
 }
 
-export function clampBattleLevel(
-  requestedLevel,
-  playerLevel,
-) {
-  const maxLevel =
-    normalizeLevel(
-      playerLevel,
-    );
-
-  const requested =
-    normalizeLevel(
-      requestedLevel,
-    );
-
-  return Math.min(
-    requested,
-    maxLevel,
-  );
+/*
+ * 選択されたバトルレベルを
+ * 1〜MAX_BATTLE_LEVELの範囲に調整します。
+ */
+export function clampBattleLevel(requestedLevel) {
+  return normalizeLevel(requestedLevel);
 }

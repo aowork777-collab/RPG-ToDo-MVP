@@ -11,9 +11,7 @@ import {
   ensureBattleState,
 } from "./state.mjs";
 
-function randomDamage(
-  baseDamage,
-) {
+function randomDamage(baseDamage) {
   const rate =
     0.9 +
     Math.random() * 0.2;
@@ -47,8 +45,7 @@ function createPlayer(
     Math.max(
       1,
       Math.floor(
-        Number(playerLevel) ||
-        1,
+        Number(playerLevel) || 1,
       ),
     );
 
@@ -80,9 +77,7 @@ function createPlayer(
   };
 }
 
-function createEnemy(
-  stage,
-) {
+function createEnemy(stage) {
   return {
     id:
       stage.enemyId,
@@ -112,9 +107,7 @@ function createEnemy(
   };
 }
 
-function finishVictory(
-  battle,
-) {
+function finishVictory(battle) {
   const current =
     battle.currentBattle;
 
@@ -147,9 +140,7 @@ function finishVictory(
   );
 }
 
-function finishDefeat(
-  battle,
-) {
+function finishDefeat(battle) {
   const current =
     battle.currentBattle;
 
@@ -159,8 +150,7 @@ function finishDefeat(
   current.phase =
     "finished";
 
-  current.goldEarned =
-    0;
+  current.goldEarned = 0;
 
   current.finishedAt =
     new Date().toISOString();
@@ -173,9 +163,7 @@ function finishDefeat(
   );
 }
 
-function runEnemyTurn(
-  battle,
-) {
+function runEnemyTurn(battle) {
   const current =
     battle.currentBattle;
 
@@ -193,11 +181,11 @@ function runEnemyTurn(
   let damage =
     randomDamage(
       enemy.attack *
-      (
-        powerfulAttack
-          ? 1.4
-          : 1
-      ),
+        (
+          powerfulAttack
+            ? 1.4
+            : 1
+        ),
     );
 
   if (player.guarding) {
@@ -221,8 +209,7 @@ function runEnemyTurn(
   player.hp =
     Math.max(
       0,
-      player.hp -
-      damage,
+      player.hp - damage,
     );
 
   appendLog(
@@ -250,15 +237,18 @@ function runEnemyTurn(
     );
 
   current.turn += 1;
-
-  current.phase =
-    "player";
+  current.phase = "player";
 }
 
+/*
+ * BATTLE LEVELを変更します。
+ *
+ * PLAYER LEVELによる制限は行いません。
+ * stages.mjsのMAX_BATTLE_LEVELだけが上限です。
+ */
 export function selectBattleLevel(
   state,
   battleLevel,
-  playerLevel,
 ) {
   const battle =
     ensureBattleState(
@@ -275,12 +265,20 @@ export function selectBattleLevel(
   battle.selectedBattleLevel =
     clampBattleLevel(
       battleLevel,
-      playerLevel,
     );
 
   return true;
 }
 
+/*
+ * 戦闘を開始します。
+ *
+ * playerLevel:
+ * タスクで上げたプレイヤーの強さ
+ *
+ * requestedBattleLevel:
+ * 自分で選択した敵のレベル
+ */
 export function startBattle(
   state,
   playerLevel,
@@ -295,8 +293,6 @@ export function startBattle(
     clampBattleLevel(
       requestedBattleLevel ??
         battle.selectedBattleLevel,
-
-      playerLevel,
     );
 
   const stage =
@@ -363,8 +359,7 @@ export function useBattleSkill(
 
   if (
     !current ||
-    current.status !==
-      "playing"
+    current.status !== "playing"
   ) {
     return {
       ok: false,
@@ -374,8 +369,7 @@ export function useBattleSkill(
   }
 
   if (
-    current.phase !==
-    "player"
+    current.phase !== "player"
   ) {
     return {
       ok: false,
@@ -415,20 +409,19 @@ export function useBattleSkill(
    * 攻撃技
    */
   if (
-    skill.type ===
-    "attack"
+    skill.type === "attack"
   ) {
     const damage =
       randomDamage(
         current.player.attack *
-        skill.power,
+          skill.power,
       );
 
     current.enemy.hp =
       Math.max(
         0,
         current.enemy.hp -
-        damage,
+          damage,
       );
 
     appendLog(
@@ -441,8 +434,7 @@ export function useBattleSkill(
    * ガード
    */
   if (
-    skill.type ===
-    "guard"
+    skill.type === "guard"
   ) {
     current.player.guarding =
       true;
@@ -457,15 +449,14 @@ export function useBattleSkill(
    * 回復
    */
   if (
-    skill.type ===
-    "heal"
+    skill.type === "heal"
   ) {
     const healAmount =
       Math.max(
         1,
         Math.floor(
           current.player.maxHp *
-          skill.healRate,
+            skill.healRate,
         ),
       );
 
@@ -476,7 +467,7 @@ export function useBattleSkill(
       Math.min(
         current.player.maxHp,
         current.player.hp +
-        healAmount,
+          healAmount,
       );
 
     const actualHeal =

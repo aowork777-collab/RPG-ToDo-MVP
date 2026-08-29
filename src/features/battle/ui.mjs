@@ -1,48 +1,35 @@
-import {
-  BATTLE_SKILLS,
-} from "./skills.mjs";
+import { BATTLE_SKILLS } from "./skills.mjs";
 
 import {
   getAvailableBattleLevels,
   getBattleStage,
 } from "./stages.mjs";
 
-import {
-  ensureBattleState,
-} from "./state.mjs";
+import { ensureBattleState } from "./state.mjs";
 
 function element(
   tagName,
   className = "",
   text = "",
 ) {
-  const node =
-    document.createElement(
-      tagName,
-    );
+  const node = document.createElement(tagName);
 
   if (className) {
-    node.className =
-      className;
+    node.className = className;
   }
 
   if (text !== "") {
-    node.textContent =
-      text;
+    node.textContent = text;
   }
 
   return node;
 }
 
-function stat(
-  label,
-  value,
-) {
-  const node =
-    element(
-      "div",
-      "battle-page-stat",
-    );
+function stat(label, value) {
+  const node = element(
+    "div",
+    "battle-page-stat",
+  );
 
   node.append(
     element(
@@ -50,7 +37,6 @@ function stat(
       "",
       label,
     ),
-
     element(
       "strong",
       "",
@@ -67,17 +53,15 @@ function meter(
   max,
   type,
 ) {
-  const wrapper =
-    element(
-      "div",
-      "combat-meter",
-    );
+  const wrapper = element(
+    "div",
+    "combat-meter",
+  );
 
-  const copy =
-    element(
-      "div",
-      "combat-meter-copy",
-    );
+  const copy = element(
+    "div",
+    "combat-meter-copy",
+  );
 
   copy.append(
     element(
@@ -85,7 +69,6 @@ function meter(
       "",
       label,
     ),
-
     element(
       "strong",
       "",
@@ -93,17 +76,15 @@ function meter(
     ),
   );
 
-  const track =
-    element(
-      "div",
-      "combat-meter-track",
-    );
+  const track = element(
+    "div",
+    "combat-meter-track",
+  );
 
-  const bar =
-    element(
-      "span",
-      `combat-meter-bar ${type}`,
-    );
+  const bar = element(
+    "span",
+    `combat-meter-bar ${type}`,
+  );
 
   const percent =
     max > 0
@@ -111,16 +92,12 @@ function meter(
           0,
           Math.min(
             100,
-            (
-              current /
-              max
-            ) * 100,
+            (current / max) * 100,
           ),
         )
       : 0;
 
-  bar.style.width =
-    `${percent}%`;
+  bar.style.width = `${percent}%`;
 
   track.append(bar);
 
@@ -135,19 +112,16 @@ function meter(
 function renderStageSelection(
   root,
   battle,
-  playerLevel,
   actions,
 ) {
-  const stage =
-    getBattleStage(
-      battle.selectedBattleLevel,
-    );
+  const stage = getBattleStage(
+    battle.selectedBattleLevel,
+  );
 
-  const panel =
-    element(
-      "section",
-      "battle-select-panel battle-panel",
-    );
+  const panel = element(
+    "section",
+    "battle-select-panel battle-panel",
+  );
 
   panel.append(
     element(
@@ -155,9 +129,6 @@ function renderStageSelection(
       "battle-kicker",
       "SELECT BATTLE LEVEL",
     ),
-  );
-
-  panel.append(
     element(
       "h1",
       "",
@@ -165,38 +136,31 @@ function renderStageSelection(
     ),
   );
 
-  const select =
-    element(
-      "select",
-      "battle-level-select",
-    );
+  const select = element(
+    "select",
+    "battle-level-select",
+  );
 
   select.setAttribute(
     "aria-label",
     "バトルレベルを選択",
   );
 
-  getAvailableBattleLevels(
-    playerLevel,
-  ).forEach(
+  getAvailableBattleLevels().forEach(
     (level) => {
-      const option =
-        element(
-          "option",
-          "",
-          `BATTLE LEVEL ${level}`,
-        );
+      const option = element(
+        "option",
+        "",
+        `BATTLE LEVEL ${level}`,
+      );
 
-      option.value =
-        String(level);
+      option.value = String(level);
 
       option.selected =
         level ===
         battle.selectedBattleLevel;
 
-      select.append(
-        option,
-      );
+      select.append(option);
     },
   );
 
@@ -204,18 +168,15 @@ function renderStageSelection(
     "change",
     () => {
       actions.selectLevel(
-        Number(
-          select.value,
-        ),
+        Number(select.value),
       );
     },
   );
 
-  const preview =
-    element(
-      "div",
-      "stage-preview",
-    );
+  const preview = element(
+    "div",
+    "stage-preview",
+  );
 
   preview.append(
     element(
@@ -223,19 +184,16 @@ function renderStageSelection(
       "stage-enemy-icon",
       stage.enemyIcon,
     ),
-
     element(
       "h2",
       "",
       stage.enemyName,
     ),
-
     element(
       "p",
       "",
       `ENEMY LEVEL ${stage.level}`,
     ),
-
     element(
       "strong",
       "stage-reward",
@@ -243,15 +201,13 @@ function renderStageSelection(
     ),
   );
 
-  const startButton =
-    element(
-      "button",
-      "primary-button battle-start-button",
-      "⚔ 戦闘開始",
-    );
+  const startButton = element(
+    "button",
+    "primary-button battle-start-button",
+    "⚔ 戦闘開始",
+  );
 
-  startButton.type =
-    "button";
+  startButton.type = "button";
 
   startButton.addEventListener(
     "click",
@@ -264,9 +220,7 @@ function renderStageSelection(
     startButton,
   );
 
-  root.append(
-    panel,
-  );
+  root.append(panel);
 }
 
 function renderCombat(
@@ -274,39 +228,34 @@ function renderCombat(
   current,
   actions,
 ) {
-  const panel =
-    element(
-      "section",
-      "combat-panel battle-panel",
-    );
+  const panel = element(
+    "section",
+    "combat-panel battle-panel",
+  );
 
   const turnText =
-    current.status ===
-    "playing"
+    current.status === "playing"
       ? `TURN ${current.turn} / YOUR TURN`
       : current.status.toUpperCase();
 
-  const turn =
-    element(
-      "div",
-      "combat-turn",
-      turnText,
-    );
+  const turn = element(
+    "div",
+    "combat-turn",
+    turnText,
+  );
 
-  const fighters =
-    element(
-      "div",
-      "combat-fighters",
-    );
+  const fighters = element(
+    "div",
+    "combat-fighters",
+  );
 
   /*
    * プレイヤー
    */
-  const playerCard =
-    element(
-      "article",
-      "fighter-card player-fighter",
-    );
+  const playerCard = element(
+    "article",
+    "fighter-card player-fighter",
+  );
 
   playerCard.append(
     element(
@@ -314,20 +263,17 @@ function renderCombat(
       "fighter-label",
       `PLAYER LEVEL ${current.player.level}`,
     ),
-
     element(
       "h2",
       "",
       "YOU",
     ),
-
     meter(
       "HP",
       current.player.hp,
       current.player.maxHp,
       "hp-player",
     ),
-
     meter(
       "MP",
       current.player.mp,
@@ -339,11 +285,10 @@ function renderCombat(
   /*
    * 敵
    */
-  const enemyCard =
-    element(
-      "article",
-      "fighter-card enemy-fighter",
-    );
+  const enemyCard = element(
+    "article",
+    "fighter-card enemy-fighter",
+  );
 
   enemyCard.append(
     element(
@@ -351,19 +296,16 @@ function renderCombat(
       "combat-enemy-icon",
       current.enemy.icon,
     ),
-
     element(
       "p",
       "fighter-label",
       `ENEMY LEVEL ${current.enemy.level}`,
     ),
-
     element(
       "h2",
       "",
       current.enemy.name,
     ),
-
     meter(
       "HP",
       current.enemy.hp,
@@ -374,13 +316,11 @@ function renderCombat(
 
   fighters.append(
     playerCard,
-
     element(
       "div",
       "combat-versus",
       "VS",
     ),
-
     enemyCard,
   );
 
@@ -392,15 +332,11 @@ function renderCombat(
   /*
    * 戦闘中の技ボタン
    */
-  if (
-    current.status ===
-    "playing"
-  ) {
-    const commandArea =
-      element(
-        "section",
-        "combat-commands",
-      );
+  if (current.status === "playing") {
+    const commandArea = element(
+      "section",
+      "combat-commands",
+    );
 
     commandArea.append(
       element(
@@ -410,28 +346,23 @@ function renderCombat(
       ),
     );
 
-    const buttons =
-      element(
-        "div",
-        "skill-grid",
-      );
+    const buttons = element(
+      "div",
+      "skill-grid",
+    );
 
     BATTLE_SKILLS.forEach(
       (skill) => {
-        const button =
-          element(
-            "button",
-            "skill-button",
-          );
+        const button = element(
+          "button",
+          "skill-button",
+        );
 
-        button.type =
-          "button";
+        button.type = "button";
 
         button.disabled =
-          current.phase !==
-            "player" ||
-          current.player.mp <
-            skill.mpCost;
+          current.phase !== "player" ||
+          current.player.mp < skill.mpCost;
 
         button.append(
           element(
@@ -439,13 +370,11 @@ function renderCombat(
             "skill-icon",
             skill.icon,
           ),
-
           element(
             "strong",
             "",
             skill.name,
           ),
-
           element(
             "small",
             "",
@@ -453,7 +382,6 @@ function renderCombat(
               ? `MP ${skill.mpCost}`
               : "MP 0",
           ),
-
           element(
             "small",
             "skill-description",
@@ -470,66 +398,52 @@ function renderCombat(
           },
         );
 
-        buttons.append(
-          button,
-        );
+        buttons.append(button);
       },
     );
 
-    commandArea.append(
-      buttons,
-    );
-
-    panel.append(
-      commandArea,
-    );
+    commandArea.append(buttons);
+    panel.append(commandArea);
   } else {
     /*
      * 戦闘終了
      */
     const resultText =
-      current.status ===
-      "victory"
+      current.status === "victory"
         ? `VICTORY! +${current.goldEarned} GOLD`
         : "DEFEAT / GOLDは失いません";
 
-    const result =
-      element(
-        "section",
-        `combat-result ${current.status}`,
-        resultText,
-      );
+    const result = element(
+      "section",
+      `combat-result ${current.status}`,
+      resultText,
+    );
 
-    const controls =
-      element(
-        "div",
-        "battle-result-actions",
-      );
+    const controls = element(
+      "div",
+      "battle-result-actions",
+    );
 
-    const retry =
-      element(
-        "button",
-        "primary-button",
-        "もう一度戦う",
-      );
+    const retry = element(
+      "button",
+      "primary-button",
+      "もう一度戦う",
+    );
 
-    retry.type =
-      "button";
+    retry.type = "button";
 
     retry.addEventListener(
       "click",
       actions.retry,
     );
 
-    const stages =
-      element(
-        "button",
-        "secondary-button",
-        "レベル選択へ戻る",
-      );
+    const stages = element(
+      "button",
+      "secondary-button",
+      "レベル選択へ戻る",
+    );
 
-    stages.type =
-      "button";
+    stages.type = "button";
 
     stages.addEventListener(
       "click",
@@ -550,11 +464,10 @@ function renderCombat(
   /*
    * 戦闘ログ
    */
-  const logPanel =
-    element(
-      "section",
-      "combat-log-panel",
-    );
+  const logPanel = element(
+    "section",
+    "combat-log-panel",
+  );
 
   logPanel.append(
     element(
@@ -564,11 +477,10 @@ function renderCombat(
     ),
   );
 
-  const log =
-    element(
-      "ol",
-      "combat-log",
-    );
+  const log = element(
+    "ol",
+    "combat-log",
+  );
 
   current.log.forEach(
     (line) => {
@@ -582,20 +494,11 @@ function renderCombat(
     },
   );
 
-  logPanel.append(
-    log,
-  );
+  logPanel.append(log);
+  panel.append(logPanel);
+  root.append(panel);
 
-  panel.append(
-    logPanel,
-  );
-
-  root.append(
-    panel,
-  );
-
-  log.scrollTop =
-    log.scrollHeight;
+  log.scrollTop = log.scrollHeight;
 }
 
 export function renderBattlePage(
@@ -607,72 +510,62 @@ export function renderBattlePage(
     return;
   }
 
-  const battle =
-    ensureBattleState(
-      state,
-    );
+  const battle = ensureBattleState(
+    state,
+  );
 
-  const playerLevel =
-    Math.max(
-      1,
-      Math.floor(
-        Number(
-          options.playerLevel,
-        ) || 1,
-      ),
-    );
+  const playerLevel = Math.max(
+    1,
+    Math.floor(
+      Number(options.playerLevel) || 1,
+    ),
+  );
 
+  /*
+   * PLAYER LEVELでは制限せず、
+   * 1〜MAX_BATTLE_LEVELの範囲だけに調整します。
+   */
   battle.selectedBattleLevel =
-    Math.min(
+    getBattleStage(
       battle.selectedBattleLevel,
-      playerLevel,
-    );
+    ).level;
 
   root.replaceChildren();
 
   /*
    * 戦績
    */
-  const status =
-    element(
-      "section",
-      "battle-page-status",
-    );
+  const status = element(
+    "section",
+    "battle-page-status",
+  );
 
   status.append(
     stat(
       "PLAYER LEVEL",
       playerLevel,
     ),
-
     stat(
       "GOLD",
       battle.gold,
     ),
-
     stat(
       "WINS",
       battle.wins,
     ),
-
     stat(
       "LOSSES",
       battle.losses,
     ),
-
     stat(
       "MAX CLEAR",
       battle.highestClearedLevel,
     ),
   );
 
-  root.append(
-    status,
-  );
+  root.append(status);
 
-  if (
-    battle.currentBattle
-  ) {
+  if (battle.currentBattle) {
     renderCombat(
       root,
       battle.currentBattle,
@@ -682,7 +575,6 @@ export function renderBattlePage(
     renderStageSelection(
       root,
       battle,
-      playerLevel,
       options.actions,
     );
   }

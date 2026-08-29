@@ -16,22 +16,16 @@ function createEmptyState(actions) {
   empty.className = "daily-empty";
 
   const title = document.createElement("strong");
-  title.textContent =
-    "毎日のクエストは未登録です";
+  title.textContent = "毎日のクエストは未登録です";
 
-  const description =
-    document.createElement("p");
-
+  const description = document.createElement("p");
   description.textContent =
     "毎日必ず行いたいタスクを登録できます。";
 
-  const button =
-    document.createElement("button");
-
+  const button = document.createElement("button");
   button.type = "button";
   button.className = "primary-button";
-  button.textContent =
-    "毎日クエストを追加";
+  button.textContent = "毎日クエストを追加";
 
   button.addEventListener(
     "click",
@@ -55,13 +49,15 @@ function createTemplateItem(
   const todayKey = getLocalDateKey();
 
   const todayTask = state.tasks.find(
-    (task) =>
-      task.dailyTemplateId === template.id &&
-      task.dateKey === todayKey,
+    (task) => {
+      return (
+        task.dailyTemplateId === template.id &&
+        task.dateKey === todayKey
+      );
+    },
   );
 
-  const item =
-    document.createElement("article");
+  const item = document.createElement("article");
 
   item.className =
     `daily-template-item${
@@ -70,51 +66,36 @@ function createTemplateItem(
         : " disabled"
     }`;
 
-  const content =
-    document.createElement("div");
+  const content = document.createElement("div");
+  content.className = "daily-template-content";
 
-  content.className =
-    "daily-template-content";
-
-  const title =
-    document.createElement("h3");
-
+  const title = document.createElement("h3");
   title.textContent = template.title;
 
-  const meta =
-    document.createElement("div");
-
+  const meta = document.createElement("div");
   meta.className = "daily-template-meta";
 
-  const difficulty =
-    document.createElement("span");
+  const difficulty = document.createElement("span");
+  difficulty.textContent = difficultyStars(
+    template.difficulty,
+  );
 
-  difficulty.textContent =
-    difficultyStars(
-      template.difficulty,
-    );
+  difficulty.setAttribute(
+    "aria-label",
+    `難易度 ${template.difficulty}`,
+  );
 
-  const due =
-    document.createElement("span");
+  const due = document.createElement("span");
+  due.textContent = formatDueTime(
+    template.dueTime,
+  );
 
-  due.textContent =
-    formatDueTime(
-      template.dueTime,
-    );
-
-  const reward =
-    document.createElement("span");
-
+  const reward = document.createElement("span");
+  reward.className = "xp-reward";
   reward.textContent =
-    `+${
-      calculateTaskReward(
-        template.difficulty,
-        false,
-      )
-    } XP`;
+    `+${calculateTaskReward(template.difficulty)} XP`;
 
-  const status =
-    document.createElement("span");
+  const status = document.createElement("span");
 
   status.className =
     `daily-status ${
@@ -138,42 +119,45 @@ function createTemplateItem(
     status,
   );
 
-  content.append(title, meta);
+  content.append(
+    title,
+    meta,
+  );
 
-  const controls =
-    document.createElement("div");
+  const controls = document.createElement("div");
+  controls.className = "daily-template-controls";
 
-  controls.className =
-    "daily-template-controls";
-
-  const toggleButton =
-    document.createElement("button");
-
+  const toggleButton = document.createElement("button");
   toggleButton.type = "button";
-  toggleButton.className =
-    "action-button";
+  toggleButton.className = "action-button";
 
   toggleButton.textContent =
     template.enabled
       ? "一時停止"
       : "再開";
 
-  toggleButton.addEventListener(
-    "click",
-    () =>
-      actions.toggleTemplate(
-        template.id,
-      ),
+  toggleButton.setAttribute(
+    "aria-label",
+    template.enabled
+      ? `${template.title}を一時停止`
+      : `${template.title}を再開`,
   );
 
-  const deleteButton =
-    document.createElement("button");
+  toggleButton.addEventListener(
+    "click",
+    () => {
+      actions.toggleTemplate(
+        template.id,
+      );
+    },
+  );
 
+  const deleteButton = document.createElement("button");
   deleteButton.type = "button";
   deleteButton.className =
     "action-button delete-action";
-
   deleteButton.textContent = "×";
+  deleteButton.title = "削除";
 
   deleteButton.setAttribute(
     "aria-label",
@@ -182,10 +166,11 @@ function createTemplateItem(
 
   deleteButton.addEventListener(
     "click",
-    () =>
+    () => {
       actions.deleteTemplate(
         template.id,
-      ),
+      );
+    },
   );
 
   controls.append(
@@ -193,7 +178,10 @@ function createTemplateItem(
     deleteButton,
   );
 
-  item.append(content, controls);
+  item.append(
+    content,
+    controls,
+  );
 
   return item;
 }
@@ -213,7 +201,7 @@ export function renderDailyList(
   container.replaceChildren();
 
   const templates =
-    state.daily?.templates || [];
+    state.daily?.templates ?? [];
 
   if (templates.length === 0) {
     container.append(
