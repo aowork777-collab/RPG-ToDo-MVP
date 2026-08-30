@@ -1,11 +1,32 @@
 export const MAX_BATTLE_LEVEL = 99;
 
+/*
+ * stages.mjsからassets/monstersまでの
+ * 安全なURLを生成します。
+ *
+ * GitHub Pagesのサブディレクトリ公開にも対応します。
+ */
+function getMonsterImageUrl(fileName) {
+  return new URL(
+    `../../../assets/monsters/${fileName}`,
+    import.meta.url,
+  ).href;
+}
+
 const ENEMY_TIERS = Object.freeze([
   Object.freeze({
     minLevel: 1,
     id: "slime",
     name: "スライム",
     icon: "🟢",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "slime.webp",
+      ),
+      alt: "スライム",
+    }),
   }),
 
   Object.freeze({
@@ -13,6 +34,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "goblin",
     name: "ゴブリン",
     icon: "👺",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "goblin.webp",
+      ),
+      alt: "ゴブリン",
+    }),
   }),
 
   Object.freeze({
@@ -20,6 +49,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "wolf",
     name: "ワイルドウルフ",
     icon: "🐺",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "wolf.webp",
+      ),
+      alt: "ワイルドウルフ",
+    }),
   }),
 
   Object.freeze({
@@ -27,6 +64,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "skeleton",
     name: "スケルトン",
     icon: "💀",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "skeleton.webp",
+      ),
+      alt: "スケルトン",
+    }),
   }),
 
   Object.freeze({
@@ -34,6 +79,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "orc",
     name: "オーク",
     icon: "👹",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "orc.webp",
+      ),
+      alt: "オーク",
+    }),
   }),
 
   Object.freeze({
@@ -41,6 +94,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "demon",
     name: "デーモン",
     icon: "😈",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "demon.webp",
+      ),
+      alt: "デーモン",
+    }),
   }),
 
   Object.freeze({
@@ -48,6 +109,14 @@ const ENEMY_TIERS = Object.freeze([
     id: "dragon",
     name: "ドラゴン",
     icon: "🐉",
+
+    media: Object.freeze({
+      type: "image",
+      src: getMonsterImageUrl(
+        "dragon.webp",
+      ),
+      alt: "ドラゴン",
+    }),
   }),
 ]);
 
@@ -79,17 +148,35 @@ function getEnemyTier(level) {
 }
 
 export function getBattleStage(level) {
-  const battleLevel = normalizeLevel(level);
-  const tier = getEnemyTier(battleLevel);
+  const battleLevel =
+    normalizeLevel(level);
+
+  const tier =
+    getEnemyTier(
+      battleLevel,
+    );
 
   return {
     level: battleLevel,
 
-    enemyId: `${tier.id}-level-${battleLevel}`,
+    enemyId:
+      `${tier.id}-level-${battleLevel}`,
 
-    enemyName: tier.name,
+    enemyName:
+      tier.name,
 
-    enemyIcon: tier.icon,
+    /*
+     * 画像を読み込めない場合の
+     * フォールバック用アイコン
+     */
+    enemyIcon:
+      tier.icon,
+
+    /*
+     * 画像または動画の情報
+     */
+    enemyMedia:
+      tier.media,
 
     enemyMaxHp:
       45 +
@@ -107,7 +194,7 @@ export function getBattleStage(level) {
 
 /*
  * PLAYER LEVELに関係なく、
- * BATTLE LEVEL 1〜99を選択可能にします。
+ * BATTLE LEVEL 1〜99を選択できます。
  */
 export function getAvailableBattleLevels() {
   return Array.from(
@@ -120,8 +207,12 @@ export function getAvailableBattleLevels() {
 
 /*
  * 選択されたバトルレベルを
- * 1〜MAX_BATTLE_LEVELの範囲に調整します。
+ * 1〜99の範囲に調整します。
  */
-export function clampBattleLevel(requestedLevel) {
-  return normalizeLevel(requestedLevel);
+export function clampBattleLevel(
+  requestedLevel,
+) {
+  return normalizeLevel(
+    requestedLevel,
+  );
 }

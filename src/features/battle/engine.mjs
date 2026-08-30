@@ -85,8 +85,23 @@ function createEnemy(stage) {
     name:
       stage.enemyName,
 
+    /*
+     * 画像が読み込めない場合の
+     * フォールバック用アイコン
+     */
     icon:
       stage.enemyIcon,
+
+    /*
+     * stages.mjsで設定した
+     * 画像または動画の情報
+     */
+    media:
+      stage.enemyMedia
+        ? {
+            ...stage.enemyMedia,
+          }
+        : null,
 
     level:
       stage.level,
