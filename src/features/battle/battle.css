@@ -156,6 +156,7 @@
   display: grid;
   gap: 7px;
   justify-items: center;
+  min-height: 330px;
   padding: 28px;
   border:
     1px solid
@@ -175,21 +176,77 @@
   margin: 0;
 }
 
-.stage-enemy-icon,
-.combat-enemy-icon {
+.stage-reward {
+  color: #ffd166;
+}
+
+/*
+ * モンスター画像・動画の共通設定
+ */
+.enemy-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 16px;
   filter:
     drop-shadow(
-      0 10px 22px
-      rgba(255, 76, 76, 0.25)
+      0 14px 26px
+      rgba(255, 76, 76, 0.24)
     );
 }
 
-.stage-enemy-icon {
-  font-size: 4.5rem;
+.enemy-media-content {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-.stage-reward {
-  color: #ffd166;
+/*
+ * レベル選択画面のモンスター
+ */
+.stage-enemy-media {
+  width:
+    min(
+      320px,
+      80vw
+    );
+  height: 220px;
+  margin-inline: auto;
+}
+
+/*
+ * 戦闘画面のモンスター
+ */
+.combat-enemy-media {
+  width:
+    min(
+      240px,
+      100%
+    );
+  height: 180px;
+  margin-left: auto;
+}
+
+/*
+ * 画像が存在しない場合の絵文字
+ */
+.enemy-media-error {
+  background:
+    rgba(255, 255, 255, 0.025);
+}
+
+.enemy-media-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 4.5rem;
+  line-height: 1;
 }
 
 .battle-start-button {
@@ -224,7 +281,7 @@
   display: grid;
   align-content: center;
   gap: 12px;
-  min-height: 230px;
+  min-height: 310px;
   padding: 24px;
   border:
     1px solid
@@ -241,10 +298,6 @@
 
 .enemy-fighter {
   text-align: right;
-}
-
-.combat-enemy-icon {
-  font-size: 4rem;
 }
 
 .fighter-label {
@@ -340,6 +393,14 @@
     rgba(255, 97, 97, 0.65);
   background:
     rgba(255, 97, 97, 0.1);
+}
+
+.skill-button:focus-visible,
+.battle-level-select:focus-visible {
+  outline:
+    2px solid
+    #ffd166;
+  outline-offset: 3px;
 }
 
 .skill-button:disabled {
@@ -461,6 +522,17 @@
     text-align: left;
   }
 
+  .combat-enemy-media {
+    width:
+      min(
+        260px,
+        100%
+      );
+    height: 190px;
+    margin-right: auto;
+    margin-left: 0;
+  }
+
   .skill-grid {
     grid-template-columns: 1fr;
   }
@@ -477,7 +549,7 @@
   .battle-page-shell {
     width:
       min(
-        100% - 20px,
+        calc(100% - 20px),
         1180px
       );
     padding-top: 14px;
@@ -496,9 +568,40 @@
       1fr 1fr;
   }
 
-  .fighter-card {
-    min-height: 190px;
+  .battle-panel {
     padding: 18px;
+  }
+
+  .stage-preview {
+    min-height: 280px;
+    padding: 18px;
+  }
+
+  .stage-enemy-media {
+    width:
+      min(
+        240px,
+        76vw
+      );
+    height: 170px;
+  }
+
+  .fighter-card {
+    min-height: 260px;
+    padding: 18px;
+  }
+
+  .combat-enemy-media {
+    width:
+      min(
+        220px,
+        75vw
+      );
+    height: 160px;
+  }
+
+  .enemy-media-fallback {
+    font-size: 3.8rem;
   }
 
   .battle-result-actions {
@@ -508,5 +611,13 @@
   .battle-page-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (
+  prefers-reduced-motion: reduce
+) {
+  .combat-meter-bar {
+    transition: none;
   }
 }
