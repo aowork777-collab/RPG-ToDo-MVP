@@ -7,6 +7,32 @@ function drawContainedImage(context, image, width, height) {
   context.drawImage(image, -drawWidth / 2, -drawHeight, drawWidth, drawHeight);
 }
 
+function drawSpriteFrame(context, image, actor) {
+  const frame = actor.getSpriteFrame();
+  if (!frame) return false;
+
+  const sourceWidth = image.naturalWidth / frame.columns;
+  const sourceHeight = image.naturalHeight / frame.rows;
+  const sourceX = frame.column * sourceWidth;
+  const sourceY = frame.row * sourceHeight;
+
+  context.save();
+  context.imageSmoothingEnabled = false;
+  context.drawImage(
+    image,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    -actor.width / 2,
+    -actor.height,
+    actor.width,
+    actor.height,
+  );
+  context.restore();
+  return true;
+}
+
 export class CanvasRenderer {
   constructor(canvas, assets) {
     this.canvas = canvas;
@@ -138,7 +164,9 @@ export class CanvasRenderer {
 
     const image = actor.imageUrl ? this.assets.getImage(actor.imageUrl) : null;
     if (image) {
-      drawContainedImage(context, image, actor.width, actor.height);
+      if (!drawSpriteFrame(context, image, actor)) {
+        drawContainedImage(context, image, actor.width, actor.height);
+      }
     } else if (kind === "player") {
       this.drawPlayerFallback(context, actor);
     } else {

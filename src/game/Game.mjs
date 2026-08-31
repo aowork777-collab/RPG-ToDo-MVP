@@ -3,7 +3,12 @@ import { BattleController } from "./battle/battle-controller.mjs";
 import { AssetLoader } from "./core/asset-loader.mjs";
 import { GameLoop } from "./core/game-loop.mjs";
 import { TweenManager } from "./core/tween.mjs";
-import { ENEMY_HOME, PLAYER_HOME } from "./config.mjs";
+import {
+  ENEMY_HOME,
+  PLAYER_HOME,
+  PLAYER_SPRITE,
+  PLAYER_SPRITE_URL,
+} from "./config.mjs";
 import {
   getAllEnemyImageUrls,
   getStage,
@@ -55,7 +60,10 @@ export class Game {
     this.ui.setStageOptions(getStageLevels(), this.save.selectedStage);
     this.ui.renderStats(this.todoProgress.level, this.save);
 
-    await this.assets.preload(getAllEnemyImageUrls());
+    await this.assets.preload([
+      PLAYER_SPRITE_URL,
+      ...getAllEnemyImageUrls(),
+    ]);
 
     this.selectStage(this.save.selectedStage, false);
     this.loop.start();
@@ -68,9 +76,10 @@ export class Game {
       level: this.todoProgress.level,
       x: PLAYER_HOME.x,
       y: PLAYER_HOME.y,
-      width: 185,
-      height: 185,
-      imageUrl: null,
+      width: 220,
+      height: 228,
+      imageUrl: PLAYER_SPRITE_URL,
+      sprite: PLAYER_SPRITE,
       fallback: "🧙‍♂️",
       facing: 1,
     });

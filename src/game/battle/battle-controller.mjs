@@ -215,6 +215,7 @@ export class BattleController {
     this.state.phase = "finished";
     this.enemyActor.dead = true;
     this.enemyActor.setState("dead");
+    this.playerActor.setState("victory");
     this.appendLog(`VICTORY! +${this.state.goldReward} GOLD`);
     this.notify();
 
