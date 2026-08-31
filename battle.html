@@ -2,82 +2,35 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-
-    <meta
-      name="theme-color"
-      content="#111318"
-    />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0f14" />
     <meta
       name="description"
-      content="タスクで上げたレベルを使って戦うRPG ToDoのバトルアリーナ。"
+      content="ToDoで育てたレベルを使って戦う、RPG ToDoの2Dバトルゲーム。"
     />
-
-    <title>
-      BATTLE ARENA | RPG ToDo
-    </title>
-
-    <link
-      rel="stylesheet"
-      href="./styles/tokens.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/base.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./src/features/battle/battle.css"
-    />
-
-    <script
-      type="module"
-      src="./src/battle-app.mjs"
-    ></script>
+    <title>2D Battle Arena / RPG ToDo</title>
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/game.css" />
+    <script type="module" src="./src/battle-app.mjs"></script>
   </head>
-
-  <body class="battle-page-body">
-    <div class="battle-page-shell">
-      <header class="battle-page-header">
-        <a
-          class="battle-back-link"
-          href="./index.html"
-        >
-          ← QUEST BOARD
-        </a>
-
+  <body class="game-page-body">
+    <div class="game-page-shell">
+      <header class="game-page-header">
+        <a class="game-back-link" href="./index.html">← QUEST BOARD</a>
         <div>
-          <p class="battle-kicker">
-            RPG TODO / COMBAT MODE
-          </p>
-
-          <strong>
-            BATTLE ARENA
-          </strong>
+          <small>RPG TODO</small>
+          <strong>2D BATTLE ARENA</strong>
         </div>
       </header>
 
-      <main
-        id="battleApp"
-        class="battle-page-main"
-        aria-live="polite"
-      ></main>
+      <main id="gameApp" class="game-app" aria-live="polite">
+        <p class="game-loading">ゲームを読み込んでいます...</p>
+      </main>
 
-      <footer class="battle-page-footer">
-        <span>
-          PLAYER LEVEL IS EARNED FROM TASKS
-        </span>
-
-        <a href="./index.html">
-          タスク画面へ戻る
-        </a>
+      <footer class="game-page-footer">
+        <span>TODO LEVEL LINKED</span>
+        <a href="./index.html">クエスト画面へ戻る</a>
       </footer>
     </div>
   </body>
