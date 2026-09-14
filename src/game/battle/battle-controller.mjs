@@ -1,3 +1,4 @@
+import { SkillAnimator } from "./skill-animator.mjs";
 import { getSkill } from "../data/skills.mjs";
 import { getEnemyIntent } from "./combat-rules.mjs";
 import { createBattleState, canUseSkill, selectTarget, selectedEnemy, resolvePlayerAction, resolveEnemyAction, completeTurn, addLog } from "./battle-engine.mjs";
@@ -6,6 +7,7 @@ export class BattleController {
   constructor(options) {
     Object.assign(this, options);
     this.state = createBattleState(this.stage, options.playerLevel);
+    this.animator = new SkillAnimator(this);
     this.locked = false; this.cancelled = false; this.rewarded = false;
   }
   actor(id) { return id === "player" ? this.playerActor : this.enemyActors.find(a => a.id === id); }
@@ -14,7 +16,6 @@ export class BattleController {
     for (const enemy of this.state.enemies) {
       const actor = this.actor(enemy.id);
       actor.selected = enemy.id === this.state.selectedTargetId && enemy.hp > 0;
-      actor.broken = enemy.broken;
       actor.enraged = enemy.isBoss && enemy.hp / enemy.maxHp <= .4;
     }
     this.onChange?.(this.state, this.locked);
@@ -37,10 +38,6 @@ export class BattleController {
         this.renderer.addEffect("burst", actor.x, actor.y - 80);
         this.renderer.addEffect("damage", actor.x, actor.y, "−" + event.amount);
         this.audio?.play(event.id === "player" ? "hurt" : "attack");
-        if (event.broke) {
-          this.renderer.addEffect("break", actor.x, actor.y - 100, "WEAKNESS BREAK");
-          this.renderer.addEffect("damage", actor.x + 25, actor.y - 45, "−" + event.breakDamage);
-        }
         this.renderer.shake(.12);
         if (event.dead) {
           actor.dead = true; actor.setState("dead");
@@ -60,26 +57,11 @@ export class BattleController {
     const skill = getSkill(id);
     this.locked = true; this.state.phase = "animation"; this.notify();
     try {
-      const target = selectedEnemy(this.state), actor = this.playerActor;
-      if (id === "ultimate") {
-        this.renderer.addEffect("ultimate", 480, 230, skill.subtitle);
-        this.audio?.play("guard"); actor.setState("victory");
-        await this.pause(.9); actor.attack();
-      } else if (skill.type === "attack") {
-        actor.setState("run");
-        await this.move(actor, { x: this.actor(target.id).x - 120 }, .28);
-        actor.attack(); await this.pause(.2);
-        this.renderer.addEffect("slash", this.actor(target.id).x, this.actor(target.id).y);
-      } else {
-        actor.setState("guard"); await this.pause(.2);
-      }
+      const target = selectedEnemy(this.state);
+      await this.animator.beforeImpact(skill, target);
       const result = resolvePlayerAction(this.state, id);
       await this.playEvents(result.events);
-      if (skill.type === "attack" && id !== "ultimate") {
-        actor.setState("run"); actor.facing = -1;
-        await this.move(actor, { x: actor.homeX }, .28); actor.facing = 1;
-      }
-      actor.setState("idle");
+      await this.animator.afterImpact(skill);
       if (this.state.status !== "playing") { await this.finish(); return true; }
       if (result.consumesTurn) {
         completeTurn(this.state);
@@ -92,6 +74,7 @@ export class BattleController {
       this.state.phase = "player"; this.locked = false; this.notify(); return true;
     } catch (error) {
       if (this.cancelled) return false;
+      if (this.renderer.camera) Object.assign(this.renderer.camera, { x: 480, y: 270, zoom: 1 });
       this.state.status = "error"; this.state.phase = "finished"; this.locked = false;
       addLog(this.state, "演出を中断しました。ステージ進行は保存されていません。再挑戦できます。");
       this.notify(); throw error;
@@ -102,18 +85,15 @@ export class BattleController {
     const actor = this.actor(enemy.id);
     this.state.phase = "enemy"; this.notify();
     const intent = getEnemyIntent(enemy.actionCount, enemy.attack, enemy.monster, enemy);
+    this.renderer.addEffect("skill-title",0,0,enemy.name + " / " + intent.name);
     await this.pause(.3);
-    if (enemy.broken) {
-      const result = resolveEnemyAction(this.state);
-      this.renderer.addEffect("break", actor.x, actor.y - 100, "RECOVER");
-      await this.pause(.55); this.notify(); return result;
-    }
     const attack = intent.type === "attack";
     const ranged = ["fire", "ice", "shadow"].includes(intent.effect);
     if (intent.strong || intent.enraged) {
       actor.setState("charge"); this.renderer.addEffect("charge", actor.x, actor.y - 80);
       await this.pause(.4);
     }
+    if (attack) await this.animator.focus(450,300,1.08,.15);
     if (attack && !ranged) {
       actor.setState("run"); await this.move(actor, { x: this.playerActor.x + 135 }, .3);
     }
@@ -131,7 +111,7 @@ export class BattleController {
       actor.setState("run"); actor.facing = 1;
       await this.move(actor, { x: actor.homeX }, .3); actor.facing = -1;
     }
-    actor.setState("idle"); this.notify();
+    actor.setState("idle"); await this.animator.focus(480,270,1,.2); this.notify();
   }
   async finish() {
     if (this.rewarded || this.cancelled) return;

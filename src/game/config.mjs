@@ -37,3 +37,5 @@ export const PLAYER_SPRITE = Object.freeze({
     victory: Object.freeze({ row: 3, startFrame: 3, frames: 1, fps: 1, loop: false }),
   }),
 });
+
+export const ULTIMATE_IMAGE_URL = new URL("../../assets/game/player-ultimate-cutin.png", import.meta.url).href;

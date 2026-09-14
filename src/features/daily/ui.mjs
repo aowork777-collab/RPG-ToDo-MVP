@@ -156,7 +156,7 @@ function createTemplateItem(
   deleteButton.type = "button";
   deleteButton.className =
     "action-button delete-action";
-  deleteButton.textContent = "×";
+  deleteButton.textContent = "削除";
   deleteButton.title = "削除";
 
   deleteButton.setAttribute(

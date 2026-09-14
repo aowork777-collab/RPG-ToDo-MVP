@@ -327,6 +327,7 @@ function handleAddTask(
     `${task.title} / +${task.reward} XP`,
     "+",
   );
+  return task;
 }
 
 function handleOpenQuest() {
@@ -472,7 +473,7 @@ function handleDailyDateChange(
 function handleReset() {
   const confirmed =
     window.confirm(
-      "レベル・XP・クエスト・毎日タスク・戦闘記録をすべてリセットしますか？",
+      "ToDoのレベル・XP・タスク・毎日の設定をリセットしますか？ ゲームのGOLDと遠征進行は残ります。",
     );
 
   if (!confirmed) {
@@ -491,19 +492,23 @@ function handleReset() {
 
   announce(
     elements,
-    "すべてのデータをリセットしました",
+    "ToDoデータをリセットしました",
   );
 
   showToast(
     elements,
     "データをリセットしました",
-    "LEVEL 1 / 0 XP / 0 GOLD",
+    "LEVEL 1 / 0 XP",
     "↺",
   );
 }
 
 function cacheElements() {
   elements = {
+    quickTaskForm: document.getElementById("quickTaskForm"),
+    quickTaskTitle: document.getElementById("quickTaskTitle"),
+    questSearch: document.getElementById("questSearch"),
+    listSummary: document.getElementById("listSummary"),
     todayLabel:
       document.getElementById(
         "todayLabel",
@@ -639,6 +644,20 @@ function cacheElements() {
 }
 
 function bindEvents() {
+  elements.quickTaskForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = elements.quickTaskTitle.value.trim();
+    if (!title) { elements.quickTaskTitle.focus(); return; }
+    const data = new FormData();
+    data.set("title", title); data.set("difficulty", "2"); data.set("dueTime", "");
+    state.filter = "active";
+    if (elements.questSearch) elements.questSearch.value = "";
+    if (handleAddTask(data)) elements.quickTaskTitle.value = "";
+    elements.quickTaskTitle.focus();
+  });
+  elements.questSearch?.addEventListener("input", () => {
+    renderQuestList(elements, state, { toggleTask: handleToggleTask, deleteTask: handleDeleteTask, openQuest: handleOpenQuest });
+  });
   elements.openQuestButton
     .addEventListener(
       "click",

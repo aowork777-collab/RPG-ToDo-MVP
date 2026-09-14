@@ -7,7 +7,6 @@ export function clampStageLevel(value) {
 }
 const regular = ["slime", "goblin", "wolf", "skeleton", "mimic", "demon"];
 const bosses = ["orc", "frost-golem", "dragon", "phoenix"];
-const weaknesses = { slime: ["physical", "lightning"], goblin: ["physical"], wolf: ["lightning"], skeleton: ["lightning"], mimic: ["physical"], demon: ["physical", "lightning"], orc: ["physical"], "frost-golem": ["lightning"], dragon: ["physical", "lightning"], phoenix: ["lightning"] };
 
 export function getStage(value) {
   const level = clampStageLevel(value);
@@ -23,8 +22,7 @@ export function getStage(value) {
     return {
       id: id + "-" + index, monsterId: id, monster, name: monster.name, level, isBoss,
       maxHp: hp, attack, speed: isBoss ? 95 : 88 + index * 7,
-      maxToughness: isBoss ? 90 + Math.floor(level / 20) * 10 : 40 + Math.floor(level / 20) * 5,
-      weaknesses: weaknesses[id], imageUrl: monster.imageUrl, sprite: monster.sprite,
+      imageUrl: monster.imageUrl, sprite: monster.sprite,
       size: isBoss ? 290 : count > 1 ? 175 : monster.size,
     };
   });

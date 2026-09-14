@@ -1,677 +1,88 @@
 <!doctype html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-
-    <meta
-      name="theme-color"
-      content="#111318"
-    />
-
-    <meta
-      name="description"
-      content="タスクを達成してレベルを上げ、バトルに挑戦するRPG ToDo。"
-    />
-
-    <title>RPG ToDo</title>
-
-    <!-- 共通スタイル -->
-    <link
-      rel="stylesheet"
-      href="./styles/tokens.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/base.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/layout.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/player.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/quests.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/dialog.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="./styles/feedback.css"
-    />
-
-    <!-- 毎日タスク -->
-    <link
-      rel="stylesheet"
-      href="./src/features/daily/daily.css"
-    />
-
-    <!-- 戦闘画面へのリンク部分 -->
-    <link
-      rel="stylesheet"
-      href="./src/features/battle/battle.css"
-    />
-
-    <!-- スマートフォン対応 -->
-    <link
-      rel="stylesheet"
-      href="./styles/responsive.css"
-    />
-
-    <script
-      type="module"
-      src="./src/app.mjs"
-    ></script>
-  </head>
-
-  <body>
-    <div
-      class="ambient ambient-one"
-      aria-hidden="true"
-    ></div>
-
-    <div
-      class="ambient ambient-two"
-      aria-hidden="true"
-    ></div>
-
-    <div class="app-shell">
-      <!-- ヘッダー -->
-      <header class="topbar">
-        <a
-          class="brand"
-          href="#top"
-          aria-label="RPG ToDo ホーム"
-        >
-          <span
-            class="brand-mark"
-            aria-hidden="true"
-          >
-            R
-          </span>
-
-          <span>
-            <strong>
-              RPG TODO
-            </strong>
-
-            <small>
-              DAILY QUEST BOARD
-            </small>
-          </span>
-        </a>
-
-        <div class="topbar-actions">
-          <p
-            class="today"
-            id="todayLabel"
-          ></p>
-
-          <button
-            class="icon-button"
-            id="resetButton"
-            type="button"
-            aria-label="全データをリセット"
-            title="全データをリセット"
-          >
-            <span aria-hidden="true">
-              ↺
-            </span>
-          </button>
-
-          <button
-            class="primary-button compact"
-            id="openQuestButton"
-            type="button"
-          >
-            <span aria-hidden="true">
-              ＋
-            </span>
-
-            NEW QUEST
-          </button>
-        </div>
-      </header>
-
-      <main
-        id="top"
-        class="dashboard-grid"
-      >
-        <!-- プレイヤー情報 -->
-        <aside
-          class="side-column"
-          aria-label="プレイヤー情報"
-        >
-          <section class="profile-card panel">
-            <div class="eyebrow-row">
-              <p class="eyebrow">
-                PLAYER STATUS
-              </p>
-
-              <span class="online-indicator">
-                <i aria-hidden="true"></i>
-                READY
-              </span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101723" />
+  <meta name="description" content="タスクを達成して経験値を獲得。毎日の予定と繰り返しタスクを整理するRPG ToDo。" />
+  <title>今日のタスク / RPG ToDo</title>
+  <link rel="stylesheet" href="./styles/tokens.css" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/feedback.css" />
+  <link rel="stylesheet" href="./styles/todo.css?v=20260913" />
+  <script type="module" src="./src/app.mjs?v=20260913"></script>
+</head>
+<body class="todo-page">
+  <a class="skip-link" href="#questSectionTitle">タスク一覧へ移動</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="RPG ToDo ホーム"><span class="brand-mark" aria-hidden="true">R</span><strong>RPG TODO</strong></a>
+      <nav class="page-nav" aria-label="メインメニュー"><a href="./index.html" aria-current="page">タスク</a><a href="./battle.html">バトル</a></nav>
+      <p class="today" id="todayLabel"></p>
+      <button class="primary-button" id="openQuestButton" type="button"><span aria-hidden="true">＋</span> タスクを追加</button>
+    </header>
+    <main id="top" class="dashboard-grid">
+      <aside class="side-column" aria-label="プレイヤー情報">
+        <section class="profile-card panel">
+          <p class="eyebrow">YOUR PROGRESS</p>
+          <div class="player-identity"><span class="avatar" aria-hidden="true">R</span><div><p class="player-name">YOU</p><p class="player-title">今日の達成が、次のレベルへ。</p></div></div>
+          <div class="level-row"><div><span class="level-label">LEVEL</span><strong class="level-number" id="levelNumber">1</strong></div><div class="xp-copy"><strong id="xpCurrent">0</strong><span> / 100 XP</span></div></div>
+          <div class="xp-track" id="xpTrack" role="progressbar" aria-label="次のレベルまでの経験値" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="xpBar"></span></div>
+          <p class="next-level-copy" id="nextLevelCopy">あと 100 XP で LEVEL 2</p>
+          <div class="mini-stats"><div><span>未完了</span><strong id="activeQuestCount">0</strong></div><div><span>完了</span><strong id="completedQuestCount">0</strong></div></div>
+        </section>
+        <section class="battle-entry panel"><p class="eyebrow">ASTRAL EXPEDITION</p><h2>育てたレベルで冒険へ</h2><p>タスクで獲得したXPが、バトルの強さになります。</p><a href="./battle.html" class="secondary-button">バトル画面へ <span aria-hidden="true">↗</span></a></section>
+        <details class="settings-panel"><summary>データの設定</summary><p>このブラウザに自動保存されます。</p><button id="resetButton" class="danger-button" type="button">ToDoデータをリセット</button></details>
+      </aside>
+      <div class="main-column">
+        <section class="quest-section panel" aria-labelledby="questSectionTitle">
+          <div class="section-heading"><div><p class="eyebrow">QUEST LOG</p><h1 id="questSectionTitle" tabindex="-1">今日のタスク</h1><p class="section-description">ひとつずつ、できたことを増やそう。</p></div><span id="listSummary" class="list-summary"></span></div>
+          <form id="quickTaskForm" class="quick-add" aria-label="タスクをすぐ追加">
+            <label class="sr-only" for="quickTaskTitle">追加するタスク名</label>
+            <input id="quickTaskTitle" name="title" type="text" maxlength="60" required autocomplete="off" placeholder="やることを入力して Enter で追加" />
+            <button class="quick-add-button" type="submit">追加 <span aria-hidden="true">＋</span></button>
+          </form>
+          <p class="quick-hint">すぐ追加は難易度 ★★。期限・繰り返しは上の「タスクを追加」から。</p>
+          <div class="list-toolbar">
+            <div class="filter-tabs" role="group" aria-label="タスクの表示切り替え">
+              <button type="button" class="filter-tab active" data-filter="active" aria-pressed="true">未完了</button>
+              <button type="button" class="filter-tab" data-filter="all" aria-pressed="false">すべて</button>
+              <button type="button" class="filter-tab" data-filter="completed" aria-pressed="false">完了</button>
             </div>
-
-            <div class="player-identity">
-              <div
-                class="avatar"
-                aria-hidden="true"
-              >
-                <span>
-                  YOU
-                </span>
-              </div>
-
-              <div>
-                <p class="player-name">
-                  YOU
-                </p>
-
-                <p class="player-title">
-                  TASK ADVENTURER
-                </p>
-              </div>
-            </div>
-
-            <div class="level-row">
-              <div>
-                <span class="level-label">
-                  LEVEL
-                </span>
-
-                <strong
-                  class="level-number"
-                  id="levelNumber"
-                >
-                  1
-                </strong>
-              </div>
-
-              <div class="xp-copy">
-                <strong id="xpCurrent">
-                  0
-                </strong>
-
-                <span>
-                  / 100 XP
-                </span>
-              </div>
-            </div>
-
-            <div
-              class="xp-track"
-              id="xpTrack"
-              role="progressbar"
-              aria-label="次のレベルまでの経験値"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-            >
-              <span id="xpBar"></span>
-            </div>
-
-            <p
-              class="next-level-copy"
-              id="nextLevelCopy"
-            >
-              あと 100 XP で LEVEL 2
-            </p>
-
-            <div class="status-divider"></div>
-
-            <div class="mini-stats">
-              <div>
-                <span>
-                  ACTIVE QUESTS
-                </span>
-
-                <strong id="activeQuestCount">
-                  0
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  DEFEATED
-                </span>
-
-                <strong id="completedQuestCount">
-                  0
-                </strong>
-              </div>
-            </div>
-          </section>
-
-          <!-- 遊び方 -->
-          <section class="how-it-works panel">
-            <p class="eyebrow">
-              HOW TO PLAY
-            </p>
-
-            <ol>
-              <li>
-                <span>
-                  01
-                </span>
-
-                <p>
-                  今日やることを
-                  <br />
-
-                  <strong>
-                    クエストにする
-                  </strong>
-                </p>
-              </li>
-
-              <li>
-                <span>
-                  02
-                </span>
-
-                <p>
-                  クエストを完了して
-                  <br />
-
-                  <strong>
-                    XPを獲得
-                  </strong>
-                </p>
-              </li>
-
-              <li>
-                <span>
-                  03
-                </span>
-
-                <p>
-                  成長したレベルで
-                  <br />
-
-                  <strong>
-                    敵と戦う
-                  </strong>
-                </p>
-              </li>
-            </ol>
-          </section>
-        </aside>
-
-        <!-- メインコンテンツ -->
-        <div class="main-column">
-          <!-- 毎日のクエスト -->
-          <section
-            class="daily-section"
-            aria-labelledby="dailySectionTitle"
-          >
-            <div class="daily-section-header">
-              <div>
-                <p class="eyebrow">
-                  DAILY ROUTINES
-                </p>
-
-                <h2 id="dailySectionTitle">
-                  毎日のクエスト
-                </h2>
-              </div>
-
-              <button
-                class="secondary-button"
-                id="openDailyQuestButton"
-                type="button"
-              >
-                ＋ 毎日タスクを追加
-              </button>
-            </div>
-
-            <div
-              class="daily-template-list"
-              id="dailyTemplateList"
-            ></div>
-          </section>
-
-          <!-- 通常クエスト -->
-          <section
-            class="quest-section"
-            aria-labelledby="questSectionTitle"
-          >
-            <div
-              class="section-heading quest-heading"
-            >
-              <div>
-                <p class="eyebrow">
-                  QUEST LOG
-                </p>
-
-                <h2 id="questSectionTitle">
-                  今日のクエスト
-                </h2>
-              </div>
-
-              <div
-                class="filter-tabs"
-                role="group"
-                aria-label="クエストの表示切り替え"
-              >
-                <button
-                  type="button"
-                  class="filter-tab active"
-                  data-filter="active"
-                  aria-pressed="true"
-                >
-                  未完了
-                </button>
-
-                <button
-                  type="button"
-                  class="filter-tab"
-                  data-filter="all"
-                  aria-pressed="false"
-                >
-                  すべて
-                </button>
-
-                <button
-                  type="button"
-                  class="filter-tab"
-                  data-filter="completed"
-                  aria-pressed="false"
-                >
-                  完了
-                </button>
-              </div>
-            </div>
-
-            <div
-              class="quest-list"
-              id="questList"
-            ></div>
-          </section>
-
-          <!-- 戦闘画面へのリンク -->
-          <section class="battle-launch panel">
-            <div>
-              <p class="eyebrow danger">
-                COMBAT MODE
-              </p>
-
-              <h2>
-                BATTLE ARENA
-              </h2>
-
-              <p>
-                タスクで上げたLEVELを使って、
-                ターン制バトルに挑戦します。
-              </p>
-            </div>
-
-            <a
-              href="./battle.html"
-              class="primary-button"
-            >
-              ⚔ バトル画面へ
-            </a>
-          </section>
-        </div>
-      </main>
-
-      <!-- フッター -->
-      <footer>
-        <span>
-          RPG TODO / MVP
-        </span>
-
-        <span>
-          DATA SAVED ON THIS DEVICE
-        </span>
-      </footer>
-    </div>
-
-    <!-- クエスト追加ダイアログ -->
-    <dialog
-      class="quest-dialog"
-      id="questDialog"
-      aria-labelledby="dialogTitle"
-    >
-      <form
-        method="dialog"
-        id="questForm"
-      >
-        <div class="dialog-header">
-          <div>
-            <p class="eyebrow">
-              ADD TO QUEST LOG
-            </p>
-
-            <h2 id="dialogTitle">
-              新しいクエスト
-            </h2>
+            <label class="task-search"><span class="sr-only">タスクを検索</span><input id="questSearch" type="search" placeholder="タスクを検索" autocomplete="off" /></label>
           </div>
-
-          <button
-            class="icon-button"
-            type="button"
-            id="closeDialogButton"
-            aria-label="閉じる"
-          >
-            ×
-          </button>
-        </div>
-
-        <!-- クエスト名 -->
-        <label
-          class="field-label"
-          for="questTitle"
-        >
-          クエスト名
-        </label>
-
-        <input
-          class="text-input"
-          id="questTitle"
-          name="title"
-          type="text"
-          maxlength="60"
-          autocomplete="off"
-          placeholder="例：部屋を掃除する"
-          required
-        />
-
-        <!-- 難易度 -->
-        <fieldset>
-          <legend class="field-label">
-            難易度
-          </legend>
-
-          <div class="difficulty-options">
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="1"
-              />
-
-              <span>
-                <b>★</b>
-                <small>EASY</small>
-              </span>
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="2"
-                checked
-              />
-
-              <span>
-                <b>★★</b>
-                <small>NORMAL</small>
-              </span>
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="3"
-              />
-
-              <span>
-                <b>★★★</b>
-                <small>HARD</small>
-              </span>
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="4"
-              />
-
-              <span>
-                <b>★★★★</b>
-                <small>EPIC</small>
-              </span>
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="difficulty"
-                value="5"
-              />
-
-              <span>
-                <b>★★★★★</b>
-                <small>LEGEND</small>
-              </span>
-            </label>
-          </div>
-        </fieldset>
-
-        <!-- 期限 -->
-        <div class="form-row">
-          <div>
-            <label
-              class="field-label"
-              for="questDueTime"
-            >
-              期限（任意）
-            </label>
-
-            <input
-              class="text-input"
-              id="questDueTime"
-              name="dueTime"
-              type="time"
-            />
-          </div>
-        </div>
-
-        <!-- 毎日繰り返す -->
-        <label class="daily-repeat-option">
-          <input
-            id="repeatDaily"
-            name="repeatDaily"
-            type="checkbox"
-          />
-
-          <span>
-            <strong>
-              毎日繰り返す
-            </strong>
-
-            <small>
-              日付が変わると自動生成されます
-            </small>
-          </span>
-        </label>
-
-        <!-- XP報酬 -->
-        <div class="reward-preview">
-          <span>
-            QUEST REWARD
-          </span>
-
-          <strong id="rewardPreview">
-            +20 XP
-          </strong>
-        </div>
-
-        <!-- ダイアログ操作 -->
-        <div class="dialog-actions">
-          <button
-            class="secondary-button"
-            type="button"
-            id="cancelDialogButton"
-          >
-            キャンセル
-          </button>
-
-          <button
-            class="primary-button"
-            type="submit"
-          >
-            クエストを追加
-          </button>
-        </div>
-      </form>
-    </dialog>
-
-    <!-- 通知 -->
-    <div
-      class="toast-stack"
-      id="toastStack"
-      aria-live="polite"
-      aria-atomic="true"
-    ></div>
-
-    <!-- レベルアップ演出 -->
-    <div
-      class="level-flash"
-      id="levelFlash"
-      aria-hidden="true"
-    >
-      <p>
-        LEVEL UP!
-      </p>
-
-      <strong id="levelFlashNumber">
-        2
-      </strong>
-    </div>
-
-    <div
-      id="confettiLayer"
-      class="confetti-layer"
-      aria-hidden="true"
-    ></div>
-
-    <p
-      class="sr-only"
-      id="liveRegion"
-      aria-live="assertive"
-    ></p>
-  </body>
+          <div class="quest-list" id="questList"></div>
+        </section>
+        <details class="daily-section panel" id="dailySettings">
+          <summary><span><strong>毎日の繰り返し設定</strong><small>登録したタスクは、日付が変わると一覧に追加されます。</small></span></summary>
+          <div class="daily-settings-content"><div class="daily-section-header"><h2 id="dailySectionTitle">登録している習慣</h2><button class="secondary-button" id="openDailyQuestButton" type="button">＋ 毎日タスクを追加</button></div><div class="daily-template-list" id="dailyTemplateList"></div></div>
+        </details>
+      </div>
+    </main>
+    <footer><span>RPG TODO</span><span>このブラウザに自動保存 · UI UPDATE 2026.09.13</span></footer>
+  </div>
+  <dialog class="quest-dialog" id="questDialog" aria-labelledby="dialogTitle">
+    <form method="dialog" id="questForm">
+      <div class="dialog-header"><div><p class="eyebrow">NEW QUEST</p><h2 id="dialogTitle">タスクを追加</h2></div><button class="icon-button" type="button" id="closeDialogButton" aria-label="閉じる">×</button></div>
+      <label class="field-label" for="questTitle">タスク名</label>
+      <input class="text-input" id="questTitle" name="title" type="text" maxlength="60" autocomplete="off" placeholder="例：部屋を掃除する" required />
+      <fieldset><legend class="field-label">難易度</legend><div class="difficulty-options">
+        <label><input type="radio" name="difficulty" value="1" /><span><b>★</b><small>かんたん</small></span></label>
+        <label><input type="radio" name="difficulty" value="2" checked /><span><b>★★</b><small>ふつう</small></span></label>
+        <label><input type="radio" name="difficulty" value="3" /><span><b>★★★</b><small>むずかしい</small></span></label>
+        <label><input type="radio" name="difficulty" value="4" /><span><b>★★★★</b><small>かなり大変</small></span></label>
+        <label><input type="radio" name="difficulty" value="5" /><span><b>★★★★★</b><small>大きな挑戦</small></span></label>
+      </div></fieldset>
+      <label class="field-label" for="questDueTime">期限の時刻 <span>任意</span></label>
+      <input class="text-input" id="questDueTime" name="dueTime" type="time" />
+      <label class="daily-repeat-option"><input id="repeatDaily" name="repeatDaily" type="checkbox" /><span><strong>毎日繰り返す</strong><small>日付が変わると新しいタスクを自動作成</small></span></label>
+      <div class="reward-preview"><span>完了時の報酬</span><strong id="rewardPreview">+20 XP</strong></div>
+      <div class="dialog-actions"><button class="secondary-button" type="button" id="cancelDialogButton">キャンセル</button><button class="primary-button" type="submit">タスクを追加</button></div>
+    </form>
+  </dialog>
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+  <div class="level-flash" id="levelFlash" aria-hidden="true"><p>LEVEL UP!</p><strong id="levelFlashNumber">2</strong></div>
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+  <p class="sr-only" id="liveRegion" aria-live="assertive"></p>
+</body>
 </html>

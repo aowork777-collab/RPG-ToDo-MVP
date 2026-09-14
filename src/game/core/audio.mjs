@@ -16,6 +16,7 @@ export class BattleAudio {
   play(type) {
     if (!this.enabled || this.context?.state !== "running") return;
     const notes = { select: [660], attack: [220, 110], hurt: [120, 70],
+      slash: [880, 440, 160], charge: [196, 294, 392, 588], ultimate: [130, 261, 392, 523, 784, 1046],
       heal: [440, 660, 880], guard: [260, 390], victory: [523, 659, 784, 1046], defeat: [220, 165, 110] }[type] || [330];
     notes.forEach((frequency, index) => {
       const start = this.context.currentTime + index * 0.085;

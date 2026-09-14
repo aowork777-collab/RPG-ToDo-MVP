@@ -4,7 +4,7 @@ import { AssetLoader } from "./core/asset-loader.mjs";
 import { GameLoop } from "./core/game-loop.mjs";
 import { TweenManager } from "./core/tween.mjs";
 import { BattleAudio } from "./core/audio.mjs";
-import { PLAYER_HOME, PLAYER_SPRITE, PLAYER_SPRITE_URL, ARENA_IMAGE_URL } from "./config.mjs";
+import { PLAYER_HOME, PLAYER_SPRITE, PLAYER_SPRITE_URL, ARENA_IMAGE_URL, ULTIMATE_IMAGE_URL } from "./config.mjs";
 import { getStage } from "./data/stages.mjs";
 import { Actor } from "./entities/actor.mjs";
 import { CanvasRenderer } from "./rendering/canvas-renderer.mjs";
@@ -36,7 +36,7 @@ export class Game {
     this.setMotion(this.reducedMotion);
     this.loop = new GameLoop(delta => this.update(delta), elapsed => this.renderer.render(elapsed));
     this.ui.renderStats(this.todoProgress.level, this.save);
-    await this.assets.preload([PLAYER_SPRITE_URL, ARENA_IMAGE_URL]);
+    await this.assets.preload([PLAYER_SPRITE_URL, ARENA_IMAGE_URL, ULTIMATE_IMAGE_URL]);
     if (this.destroyed) return;
     this.ready = true; this.loop.start();
     await this.prepareStage();

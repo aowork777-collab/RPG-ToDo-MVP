@@ -16,8 +16,7 @@ export function getEnemyIntent(turn, attack, monster, enemy) {
   const range = move.type === "attack" ? damageRange(attack * multiplier) : { min: 0, max: 0 };
   return { ...move, multiplier, enraged, strong: multiplier * move.hits >= 1.5, min: range.min * move.hits, max: range.max * move.hits };
 }
-export function matchesWeakness(enemy, element) { return element === "astral" || enemy.weaknesses.includes(element); }
 export function previewDamage(player, enemy, skill) {
-  const modifier = (enemy.broken ? 1.25 : 1) * (enemy.guarding ? .5 : 1);
+  const modifier = (enemy.guarding ? .5 : 1);
   return damageRange(player.attack * skill.power * modifier);
 }

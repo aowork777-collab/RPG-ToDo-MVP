@@ -1,5 +1,7 @@
 import { ARENA_IMAGE_URL, GAME_HEIGHT, GAME_WIDTH } from "../config.mjs";
 
+import { drawCinematic, drawEnergyEffect } from "./cinematic-effects.mjs";
+
 function drawContainedImage(context, image, width, height) {
   const ratio = Math.min(width / image.naturalWidth, height / image.naturalHeight);
   const drawWidth = image.naturalWidth * ratio;
@@ -45,6 +47,9 @@ export class CanvasRenderer {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
     this.assets = assets;
+    this.camera = { x: 480, y: 270, zoom: 1 };
+    this.ghosts = [];
+    this.trailClock = 0;
     this.stage = null;
     this.player = null;
     this.enemy = null;
@@ -56,6 +61,8 @@ export class CanvasRenderer {
   }
 
   setScene(stage, player, enemy) {
+    Object.assign(this.camera, { x: 480, y: 270, zoom: 1 });
+    this.ghosts = [];
     this.stage = stage;
     this.player = player;
     this.enemies = Array.isArray(enemy) ? enemy : [enemy];
@@ -65,13 +72,14 @@ export class CanvasRenderer {
   }
 
   addEffect(type, x, y, text = "") {
+    if (this.effects.length > 160) this.effects.shift();
     this.effects.push({
       type,
       x,
       y,
       text,
       elapsed: 0,
-      duration: type === "ultimate" ? 1.35 : type === "victory" ? 2 : type === "damage" ? 0.95 : 0.7,
+      duration: this.reducedMotion ? .2 : type === "cutin" ? 1.65 : type === "skill-title" ? 1.2 : type === "starfall" ? .85 : type === "victory" ? 2 : type === "damage" ? 0.95 : 0.7,
     });
   }
 
@@ -86,6 +94,19 @@ export class CanvasRenderer {
 
   update(delta) {
     this.shakeTime = Math.max(0, this.shakeTime - delta);
+    if (this.reducedMotion) this.ghosts = [];
+    this.trailClock += delta;
+    if (!this.reducedMotion && this.trailClock >= .035) {
+      this.trailClock = 0;
+      for (const actor of [this.player, ...this.enemies]) {
+        if (!actor || !["run", "attack"].includes(actor.state)) continue;
+        const ghost = Object.assign(Object.create(Object.getPrototypeOf(actor)), actor);
+        ghost.selected=false; ghost.opacity=.28; ghost.enraged=false; ghost.hurtTime=0;
+        this.ghosts.push({ actor: ghost, elapsed: 0 });
+      }
+    }
+    this.ghosts.forEach(ghost => { ghost.elapsed += delta; });
+    this.ghosts = this.ghosts.filter(ghost => ghost.elapsed < .22).slice(-24);
     this.effects.forEach((effect) => {
       effect.elapsed += delta;
     });
@@ -104,11 +125,22 @@ export class CanvasRenderer {
       );
     }
 
+    context.translate(GAME_WIDTH/2,GAME_HEIGHT/2);
+    const zoom = this.reducedMotion ? 1 : this.camera.zoom;
+    context.scale(zoom,zoom);
+    context.translate(this.reducedMotion ? -480 : -this.camera.x, this.reducedMotion ? -270 : -this.camera.y);
     this.drawBackground(elapsed);
+    this.ghosts.forEach(ghost => {
+      ghost.actor.opacity = .25 * (1 - ghost.elapsed/.22);
+      this.drawActor(ghost.actor, elapsed, "ghost");
+    });
     if (this.player) this.drawActor(this.player, elapsed, "player");
     this.enemies.forEach(enemy => { if (enemy) this.drawActor(enemy, elapsed, "enemy"); });
     this.drawEffects();
     context.restore();
+    for (const effect of this.effects) {
+      if (["cutin","skill-title","speedlines"].includes(effect.type)) drawCinematic(context,effect,this.assets,this.reducedMotion);
+    }
   }
 
   drawBackground(elapsed) {
@@ -178,10 +210,10 @@ export class CanvasRenderer {
     context.save();
     context.globalAlpha = Math.max(0, transform.opacity);
     if (actor.selected && !actor.dead) {
-      context.strokeStyle = actor.broken ? "#a8a0ff" : "#ffe3a0"; context.lineWidth = 2;
+      context.strokeStyle = "#ffe3a0"; context.lineWidth = 2;
       context.beginPath(); context.ellipse(transform.x, actor.homeY + 9, actor.width * .43, 16, 0, 0, Math.PI * 2); context.stroke();
       context.fillStyle = context.strokeStyle; context.textAlign = "center"; context.font = "700 12px system-ui";
-      context.fillText(actor.broken ? "BREAK" : "TARGET", transform.x, actor.homeY + 58);
+      context.fillText("TARGET", transform.x, actor.homeY + 58);
     }
 
     context.fillStyle = "rgba(0,0,0,0.38)";
@@ -224,6 +256,7 @@ export class CanvasRenderer {
 
     context.restore();
 
+    if (kind === "ghost") return;
     context.save();
     context.globalAlpha = transform.opacity;
     context.textAlign = "center";
@@ -251,18 +284,7 @@ export class CanvasRenderer {
 
       context.save();
       context.globalAlpha = alpha;
-      if (effect.type === "ultimate") {
-        context.globalAlpha = Math.min(1, alpha * 3);
-        context.fillStyle = "rgba(5,10,26,.82)"; context.fillRect(0, 145, GAME_WIDTH, 160);
-        context.strokeStyle = "#a6e7ff"; context.lineWidth = 2;
-        context.beginPath(); context.moveTo(0,145); context.lineTo(GAME_WIDTH,145); context.moveTo(0,305); context.lineTo(GAME_WIDTH,305); context.stroke();
-        context.textAlign = "center"; context.fillStyle = "#88ddff"; context.font = "700 14px system-ui";
-        context.fillText("ULTIMATE", 480, 195); context.font = "900 40px system-ui"; context.fillStyle = "#fff"; context.fillText(effect.text,480,257);
-      }
-      if (effect.type === "break") {
-        context.textAlign = "center"; context.font = "900 19px system-ui"; context.fillStyle = "#bceaff";
-        context.shadowColor = "#161240"; context.shadowBlur = 12; context.fillText(effect.text, effect.x, effect.y - progress * 20);
-      }
+      if (["blade-gold","blade-violet","starfall","rune"].includes(effect.type)) drawEnergyEffect(context,effect,this.reducedMotion);
       if (effect.type === "projectile") {
         const colors = { fire: "#ffb34f", ice: "#8cecff", shadow: "#c78cff" };
         const p = this.reducedMotion ? 1 : progress;

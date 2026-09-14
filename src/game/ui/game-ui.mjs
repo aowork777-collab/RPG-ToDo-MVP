@@ -1,5 +1,5 @@
 import { GAME_HEIGHT, GAME_WIDTH, MAX_BATTLE_LEVEL, BOSS_INTERVAL } from "../config.mjs";
-import { GAME_SKILLS, ELEMENTS } from "../data/skills.mjs";
+import { GAME_SKILLS } from "../data/skills.mjs";
 import { MONSTERS } from "../data/monsters.mjs";
 import { getEnemyIntent, previewDamage } from "../battle/combat-rules.mjs";
 import { canUseSkill, selectedEnemy, previewOrder } from "../battle/battle-engine.mjs";
@@ -47,14 +47,14 @@ export class GameUI {
         </section>
         <section class="battle-controls" id="battleControls" hidden>
           <div class="battle-turn-row"><p class="game-kicker" id="battleTurn" role="status"></p><span class="keyboard-hint">技 1–4 / 必殺技 5</span></div>
-          <div class="target-grid" id="targetGrid" role="group" aria-label="攻撃対象"></div>
+          <div class="combat-information"><div class="target-grid" id="targetGrid" role="group" aria-label="攻撃対象"></div>
           <div id="enemyIntent" class="enemy-intent"></div>
           <section class="player-resources" aria-label="プレイヤーの状態">
             <div class="player-health"><div><strong>YOU <span id="hudPlayerLevel"></span></strong><span id="hudPlayerHp"></span></div><div class="resource-track"><span class="hp-fill" id="hudPlayerHpBar"></span></div></div>
             <div class="sp-resource"><span>SP <strong id="spCount"></strong></span><div id="spPips" class="sp-pips" aria-hidden="true"></div></div>
             <div class="energy-resource"><span>必殺技エネルギー <strong id="energyCount"></strong></span><div class="resource-track"><span id="energyBar" class="energy-fill"></span></div></div>
           </section>
-          <div id="gameSkillGrid" class="game-skill-grid"></div>
+          </div><div id="gameSkillGrid" class="game-skill-grid"></div>
           <section id="gameResult" class="game-result" tabindex="-1" hidden>
             <span id="resultLabel" class="game-kicker"></span><h2 id="resultTitle"></h2><p id="resultDetail"></p>
             <div class="result-actions">
@@ -69,7 +69,6 @@ export class GameUI {
       </section>
       <details class="game-guide"><summary>戦闘の遊び方</summary><div>
         <p>通常攻撃でSPを1回復。戦闘スキル・回復スキルはSPを1消費します。SPは最大5です。</p>
-        <p>敵の弱点と同じ属性で攻撃すると、白い靭性ゲージが減ります。0にすると弱点撃破：追加ダメージ、行動の遅延、被ダメージ25%増加。敵は次の行動を使って復帰します。</p>
         <p>攻撃や被弾でエネルギーがたまります。100で必殺技が使用可能。自分のターンに使用でき、使った後も通常の行動を選べます。</p>
         <p>防御は次の自分のターンまで有効。HP・SP・エネルギーは戦闘開始時にリセットされます。</p>
         <p>強さはToDoのPLAYER LEVELで決まります。戦闘でToDoのXPは増減しません。</p>
@@ -95,8 +94,8 @@ export class GameUI {
     for (const [index,skill] of GAME_SKILLS.entries()) {
       const button = make("button","game-skill-button" + (skill.id === "ultimate" ? " ultimate-button" : ""));
       button.type = "button";
-      button.append(make("span","skill-number",String(index+1).padStart(2,"0") + (skill.element ? " / " + ELEMENTS[skill.element].name : "")),
-        make("strong","",skill.name),make("small","skill-subtitle",skill.subtitle),
+      button.append(make("span","skill-number",String(index+1).padStart(2,"0") + " / " + skill.name),
+        make("strong","",skill.subtitle),make("small","skill-subtitle",skill.id === "ultimate" ? "全体攻撃 · 行動消費なし" : skill.type === "heal" ? "自分を回復" : skill.type === "guard" ? "次の自分の番まで有効" : skill.splash ? "対象 + 隣接" : "敵単体"),
         make("span","skill-cost",skill.energyCost ? "ENERGY 100" : skill.spCost ? "SP −1" : "SP +1"),
         make("span","skill-estimate",""));
       button.addEventListener("click",() => { this.lastSkill = skill.id; this.actions.useSkill(skill.id); });
@@ -157,21 +156,18 @@ export class GameUI {
       let button=this.targetButtons.get(enemy.id);
       if(!button) {
         button=make("button","enemy-target"); button.type="button";
-        button.append(make("strong","target-name"),make("span","target-hp"),make("div","target-track"),make("span","target-weakness"),make("div","toughness-track"),make("span","target-toughness"));
+        button.append(make("strong","target-name"),make("span","target-hp"),make("div","target-track"),make("span","target-state"));
         button.querySelector(".target-track").append(make("span","enemy-hp-fill"));
-        button.querySelector(".toughness-track").append(make("span","toughness-fill"));
         button.addEventListener("click",()=>this.actions.selectTarget(enemy.id));
         e.targetGrid.append(button); this.targetButtons.set(enemy.id,button);
       }
       button.disabled=locked || enemy.hp<=0 || state.status!=="playing";
       button.setAttribute("aria-pressed",String(enemy.id===state.selectedTargetId && enemy.hp>0));
-      button.classList.toggle("defeated",enemy.hp<=0); button.classList.toggle("broken",enemy.broken);
+      button.classList.toggle("defeated",enemy.hp<=0);
       text(button.querySelector(".target-name"),enemy.name + (enemy.isBoss ? " · BOSS" : ""));
       text(button.querySelector(".target-hp"),"HP " + enemy.hp + " / " + enemy.maxHp);
       bar(button.querySelector(".enemy-hp-fill"),enemy.hp,enemy.maxHp);
-      text(button.querySelector(".target-weakness"),"弱点：" + enemy.weaknesses.map(id=>ELEMENTS[id].name).join("・"));
-      bar(button.querySelector(".toughness-fill"),enemy.toughness,enemy.maxToughness);
-      text(button.querySelector(".target-toughness"),enemy.hp<=0 ? "撃破" : enemy.broken ? "弱点撃破 · 行動遅延" : "靭性 " + enemy.toughness + " / " + enemy.maxToughness + (enemy.guarding ? " · 防御中" : ""));
+      text(button.querySelector(".target-state"),enemy.hp<=0 ? "撃破" : enemy.guarding ? "防御中 · ダメージ半減" : enemy.isBoss && enemy.hp/enemy.maxHp<=.4 ? "怒り · 攻撃力上昇" : enemy.id===state.selectedTargetId ? "攻撃対象に選択中" : "タップして攻撃対象にする");
     }
   }
   renderBattle(state,locked) {
@@ -187,9 +183,9 @@ export class GameUI {
     e.enemyIntent.hidden=state.status!=="playing";
     if(target) {
       const intent=getEnemyIntent(target.actionCount,target.attack,target.monster,target);
-      const detail=target.broken ? "態勢を立て直す（攻撃なし）" : intent.name + (intent.type==="attack" ? " · " + intent.min + "–" + intent.max + " ダメージ" : intent.type==="heal" ? " · HP回復" : " · 次の被ダメージ半減");
+      const detail=intent.name + (intent.type==="attack" ? " · " + intent.min + "–" + intent.max + " ダメージ" : intent.type==="heal" ? " · HP回復" : " · 次の被ダメージ半減");
       text(e.enemyIntent,target.name + "の予告：" + detail + (intent.enraged ? " / 怒り +15%" : ""));
-      e.enemyIntent.classList.toggle("danger",!target.broken && intent.strong);
+      e.enemyIntent.classList.toggle("danger",intent.strong);
     }
     text(e.hudPlayerLevel,"LV." + state.player.level);
     text(e.hudPlayerHp,state.player.hp + " / " + state.player.maxHp + (state.player.guarding ? " · 防御中" : ""));

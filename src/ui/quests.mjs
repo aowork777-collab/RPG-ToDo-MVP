@@ -116,6 +116,10 @@ function createQuestItem(task, actions) {
     reward,
   );
 
+  if (task.dailyTemplateId) {
+    const badge = document.createElement("span");
+    badge.className = "daily-badge"; badge.textContent = "毎日"; meta.append(badge);
+  }
   content.append(
     title,
     meta,
@@ -137,7 +141,7 @@ function createQuestItem(task, actions) {
   );
 
   deleteButton.title = "削除";
-  deleteButton.textContent = "×";
+  deleteButton.textContent = "削除";
 
   deleteButton.addEventListener("click", () => {
     actions.deleteTask(task.id);
@@ -159,7 +163,12 @@ export function renderQuestList(
   state,
   actions,
 ) {
+  const query = (elements.questSearch?.value || "").trim().toLocaleLowerCase("ja-JP");
+  const focused = document.activeElement;
+  const focusedTaskId = focused?.closest?.(".quest-item")?.dataset.taskId;
+  const focusedClass = focused?.classList?.contains("quest-check") ? ".quest-check" : ".delete-action";
   const visibleTasks = state.tasks
+    .filter(task => !query || task.title.toLocaleLowerCase("ja-JP").includes(query))
     .filter((task) =>
       matchesFilter(task, state.filter),
     )
@@ -174,12 +183,21 @@ export function renderQuestList(
       );
     });
 
+  if (elements.listSummary) {
+    const completed = state.tasks.filter(task => task.completed).length;
+    elements.listSummary.textContent = query
+      ? "検索結果 " + visibleTasks.length + " 件"
+      : state.tasks.length + " 件中 " + completed + " 件完了";
+  }
   elements.questList.replaceChildren();
 
   if (!visibleTasks.length) {
-    elements.questList.append(
-      createEmptyState(state.filter),
-    );
+    const empty = createEmptyState(state.filter);
+    if (query) {
+      empty.querySelector("strong").textContent = "一致するタスクがありません";
+      empty.querySelector("span").textContent = "検索する言葉を変えてみてください。";
+    }
+    elements.questList.append(empty);
 
     return;
   }
@@ -194,10 +212,19 @@ export function renderQuestList(
   });
 
   elements.questList.append(fragment);
+  if (focusedTaskId) {
+    const rows = Array.from(elements.questList.children);
+    const row = rows.find(node => node.dataset.taskId === focusedTaskId) || rows[0];
+    row?.querySelector(focusedClass)?.focus({ preventScroll: true });
+  }
 }
 
 export function renderFilters(elements, state) {
+  const completed = state.tasks.filter(task => task.completed).length;
+  const counts = { active: state.tasks.length - completed, all: state.tasks.length, completed };
+  const labels = { active: "未完了", all: "すべて", completed: "完了" };
   elements.filterTabs.forEach((button) => {
+    button.textContent = labels[button.dataset.filter] + " " + counts[button.dataset.filter];
     const active =
       button.dataset.filter === state.filter;
 
