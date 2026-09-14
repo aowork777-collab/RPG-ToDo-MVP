@@ -226,6 +226,8 @@ export function normalizeTask(
 
     title,
     difficulty,
+    dueDate: normalizeDateKey(rawTask.dueDate) || "",
+    note: String(rawTask.note || "").slice(0,500),
 
     dueTime:
       normalizeDueTime(

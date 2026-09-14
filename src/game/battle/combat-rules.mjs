@@ -1,11 +1,11 @@
 import { PLAYER_STATS } from "../config.mjs";
 
-export function createPlayerState(value) {
+export function createPlayerState(value, bonuses = {}) {
   const n = Number(value);
   const level = Number.isFinite(n) ? Math.max(1, Math.floor(n)) : 1;
-  const maxHp = PLAYER_STATS.baseHp + level * PLAYER_STATS.hpPerLevel;
+  const maxHp = PLAYER_STATS.baseHp + level * PLAYER_STATS.hpPerLevel + Math.max(0, Math.min(1000, Number(bonuses.hp) || 0));
   return { id: "player", name: "YOU", level, hp: maxHp, maxHp,
-    attack: PLAYER_STATS.baseAttack + level * PLAYER_STATS.attackPerLevel,
+    attack: PLAYER_STATS.baseAttack + level * PLAYER_STATS.attackPerLevel + Math.max(0, Math.min(100, Number(bonuses.attack) || 0)),
     speed: 110, nextAction: 0, guarding: false, energy: 0, maxEnergy: 100 };
 }
 export function damageRange(base) { return { min: Math.max(1, Math.floor(base * .95)), max: Math.max(1, Math.floor(base * 1.05)) }; }

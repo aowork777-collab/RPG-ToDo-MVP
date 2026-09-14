@@ -9,8 +9,12 @@
   <link rel="stylesheet" href="./styles/tokens.css" />
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/feedback.css" />
-  <link rel="stylesheet" href="./styles/todo.css?v=20260913" />
-  <script type="module" src="./src/app.mjs?v=20260913"></script>
+  <link rel="stylesheet" href="./styles/todo.css?v=20260914" />
+  <script type="module" src="./src/app.mjs?v=20260914"></script>
+  <link rel="stylesheet" href="./styles/app.css" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./assets/app/icon-192.png" />
+  <script type="module" src="./src/app-shell.mjs"></script>
 </head>
 <body class="todo-page">
   <a class="skip-link" href="#questSectionTitle">タスク一覧へ移動</a>
@@ -18,7 +22,7 @@
     <header class="topbar">
       <a class="brand" href="./index.html" aria-label="RPG ToDo ホーム"><span class="brand-mark" aria-hidden="true">R</span><strong>RPG TODO</strong></a>
       <nav class="page-nav" aria-label="メインメニュー"><a href="./index.html" aria-current="page">タスク</a><a href="./battle.html">バトル</a></nav>
-      <p class="today" id="todayLabel"></p>
+      <a class="global-settings-link" href="./settings.html">設定・バックアップ</a><p class="today" id="todayLabel"></p>
       <button class="primary-button" id="openQuestButton" type="button"><span aria-hidden="true">＋</span> タスクを追加</button>
     </header>
     <main id="top" class="dashboard-grid">
@@ -59,7 +63,7 @@
         </details>
       </div>
     </main>
-    <footer><span>RPG TODO</span><span>このブラウザに自動保存 · UI UPDATE 2026.09.13</span></footer>
+    <footer><span>RPG TODO</span><span>このブラウザに自動保存 · APP LOCAL 2026.09.14</span></footer>
   </div>
   <dialog class="quest-dialog" id="questDialog" aria-labelledby="dialogTitle">
     <form method="dialog" id="questForm">
@@ -73,8 +77,12 @@
         <label><input type="radio" name="difficulty" value="4" /><span><b>★★★★</b><small>かなり大変</small></span></label>
         <label><input type="radio" name="difficulty" value="5" /><span><b>★★★★★</b><small>大きな挑戦</small></span></label>
       </div></fieldset>
+      <label class="field-label" for="questDueDate">期限の日付 <span>通常タスクのみ・任意</span></label>
+      <input class="text-input" id="questDueDate" name="dueDate" type="date" data-single-task />
       <label class="field-label" for="questDueTime">期限の時刻 <span>任意</span></label>
       <input class="text-input" id="questDueTime" name="dueTime" type="time" />
+      <label class="field-label" for="questNote">メモ <span>通常タスクのみ・任意</span></label>
+      <textarea class="text-input" id="questNote" name="note" rows="2" maxlength="500" data-single-task></textarea>
       <label class="daily-repeat-option"><input id="repeatDaily" name="repeatDaily" type="checkbox" /><span><strong>毎日繰り返す</strong><small>日付が変わると新しいタスクを自動作成</small></span></label>
       <div class="reward-preview"><span>完了時の報酬</span><strong id="rewardPreview">+20 XP</strong></div>
       <div class="dialog-actions"><button class="secondary-button" type="button" id="cancelDialogButton">キャンセル</button><button class="primary-button" type="submit">タスクを追加</button></div>

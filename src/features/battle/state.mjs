@@ -23,7 +23,9 @@ function toNonNegativeInteger(
   );
 }
 
-function normalizeLog(rawLog) {
+function normalizeLog(
+  rawLog,
+) {
   if (!Array.isArray(rawLog)) {
     return [];
   }
@@ -34,61 +36,6 @@ function normalizeLog(rawLog) {
         typeof line === "string",
     )
     .slice(-80);
-}
-
-/*
- * モンスターの画像・動画情報を
- * 安全な形式へ調整します。
- */
-function normalizeMedia(
-  rawMedia,
-) {
-  if (
-    !rawMedia ||
-    typeof rawMedia !== "object"
-  ) {
-    return null;
-  }
-
-  const allowedTypes =
-    new Set([
-      "image",
-      "video",
-    ]);
-
-  const type =
-    allowedTypes.has(
-      rawMedia.type,
-    )
-      ? rawMedia.type
-      : null;
-
-  const src =
-    typeof rawMedia.src === "string"
-      ? rawMedia.src.trim()
-      : "";
-
-  if (!type || !src) {
-    return null;
-  }
-
-  return {
-    type,
-
-    src,
-
-    alt:
-      typeof rawMedia.alt === "string"
-        ? rawMedia.alt
-            .trim()
-            .slice(0, 100)
-        : "",
-
-    poster:
-      typeof rawMedia.poster === "string"
-        ? rawMedia.poster.trim()
-        : "",
-  };
 }
 
 function normalizeFighter(
@@ -119,31 +66,22 @@ function normalizeFighter(
 
   return {
     id:
-      typeof rawFighter.id === "string"
+      typeof rawFighter.id ===
+      "string"
         ? rawFighter.id
         : "",
 
     name:
-      typeof rawFighter.name === "string"
+      typeof rawFighter.name ===
+      "string"
         ? rawFighter.name
         : fallbackName,
 
-    /*
-     * 画像が読み込めない場合に
-     * 使用するフォールバックアイコン
-     */
     icon:
-      typeof rawFighter.icon === "string"
+      typeof rawFighter.icon ===
+      "string"
         ? rawFighter.icon
         : "",
-
-    /*
-     * 画像または動画の情報
-     */
-    media:
-      normalizeMedia(
-        rawFighter.media,
-      ),
 
     level:
       Math.max(
@@ -286,12 +224,14 @@ function normalizeCurrentBattle(
       ),
 
     startedAt:
-      typeof rawBattle.startedAt === "string"
+      typeof rawBattle.startedAt ===
+      "string"
         ? rawBattle.startedAt
         : null,
 
     finishedAt:
-      typeof rawBattle.finishedAt === "string"
+      typeof rawBattle.finishedAt ===
+      "string"
         ? rawBattle.finishedAt
         : null,
   };

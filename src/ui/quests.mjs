@@ -3,6 +3,8 @@ import {
   formatDueTime,
 } from "./helpers.mjs";
 
+import { deadlineLabel } from "../features/tasks/details.mjs";
+
 function matchesFilter(task, filter) {
   if (filter === "active") {
     return !task.completed;
@@ -102,7 +104,9 @@ function createQuestItem(task, actions) {
   );
 
   const due = document.createElement("span");
-  due.textContent = formatDueTime(task.dueTime);
+  const deadline = deadlineLabel(task);
+  due.textContent = deadline.text || formatDueTime(task.dueTime);
+  if (deadline.overdue) due.className = "overdue-label";
 
   const reward = document.createElement("span");
   reward.className = "xp-reward";
@@ -125,6 +129,9 @@ function createQuestItem(task, actions) {
     meta,
   );
 
+  if (task.note) {
+    const note = document.createElement("p");note.className="quest-note";note.textContent=task.note;content.append(note);
+  }
   const controls = document.createElement("div");
   controls.className = "quest-actions";
 
@@ -147,6 +154,11 @@ function createQuestItem(task, actions) {
     actions.deleteTask(task.id);
   });
 
+  if (actions.editTask) {
+    const editButton=document.createElement("button");editButton.type="button";editButton.className="action-button";
+    editButton.textContent="編集";editButton.setAttribute("aria-label",task.title+"を編集");
+    editButton.addEventListener("click",()=>actions.editTask(task.id));controls.append(editButton);
+  }
   controls.append(deleteButton);
 
   item.append(

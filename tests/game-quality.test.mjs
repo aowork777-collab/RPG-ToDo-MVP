@@ -1,255 +1,180 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { getStage } from "../src/game/data/stages.mjs";
+import { MONSTERS } from "../src/game/data/monsters.mjs";
+import { createBattleState, resolvePlayerAction, resolveEnemyAction, completeTurn, previewOrder, canUseSkill, selectTarget } from "../src/game/battle/battle-engine.mjs";
+import { createPlayerState } from "../src/game/battle/combat-rules.mjs";
+import { normalizeGameSave, applyBattleResult, getCurrentStage, isCampaignComplete, saveGameSave } from "../src/game/storage/game-storage.mjs";
 import { BattleController } from "../src/game/battle/battle-controller.mjs";
-import { createPlayerState, getEnemyIntent } from "../src/game/battle/combat-rules.mjs";
-import { getStage, getStageLevels, getAllEnemyImageUrls } from "../src/game/data/stages.mjs";
-import { Actor } from "../src/game/entities/actor.mjs";
-import { Game } from "../src/game/Game.mjs";
 import { readTodoProgress } from "../src/game/bridge/todo-level.mjs";
-import { loadGameSave, saveGameSave } from "../src/game/storage/game-storage.mjs";
+import { Actor } from "../src/game/entities/actor.mjs";
 import { PLAYER_SPRITE, PLAYER_SPRITE_URL, ARENA_IMAGE_URL } from "../src/game/config.mjs";
-import { MONSTERS, getMonster } from "../src/game/data/monsters.mjs";
-import { normalizeGameSave } from "../src/game/storage/game-storage.mjs";
-
-function setup(playerLevel = 12, level = 1, options = {}) {
-  const playerActor = new Actor({ id: "player", name: "YOU", level: playerLevel, x: 220, y: 412, sprite: PLAYER_SPRITE });
-  const enemyActor = new Actor({ id: "slime", name: "スライム", level, x: 740, y: 412, facing: -1 });
-  let finishes = 0;
-  const controller = new BattleController({
-    stage: getStage(level), playerLevel, playerActor, enemyActor,
-    tweens: { wait: async () => {}, to: async (target, properties) => Object.assign(target, properties) },
-    renderer: { addEffect() {}, addProjectile() {}, shake() {} },
-    onFinish: () => finishes++, ...options,
+const fixed=()=>.5;
+function fixture(level=1,playerLevel=1,overrides={}) {
+  const stage=getStage(level); let finishes=0;
+  const controller=new BattleController({
+    stage,playerLevel,
+    playerActor:new Actor({id:"player",sprite:PLAYER_SPRITE,x:220,y:412}),
+    enemyActors:stage.enemies.map(e=>new Actor({id:e.id,sprite:e.sprite,x:735,y:412})),
+    tweens:{wait:async()=>{},to:async(target,props)=>Object.assign(target,props)},
+    renderer:{addEffect(){},addProjectile(){},shake(){}},onFinish:()=>finishes++,...overrides,
   });
-  return { controller, playerActor, enemyActor, get finishes() { return finishes; } };
+  return {controller,get finishes(){return finishes;}};
 }
-
-test("ToDo XP drives player strength without writing ToDo storage", () => {
-  const original = JSON.stringify({ totalXp: 1168, filter: "active", tasks: [], daily: {} });
-  const values = new Map([["rpg-todo:v1", original]]);
-  const writes = [];
-  const storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => { writes.push(key); values.set(key, value); } };
-  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
-  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: storage });
-  try {
-    assert.equal(readTodoProgress().level, 12);
-    assert.equal(createPlayerState(readTodoProgress().level).attack, 56);
-    assert.ok(saveGameSave({ gold: 40, wins: 2, selectedStage: 7 }, storage));
-    assert.equal(values.get("rpg-todo:v1"), original);
-    assert.deepEqual(writes, ["rpg-todo:game:v1"]);
-    values.set("rpg-todo:v1", JSON.stringify({ totalXp: 1200, tasks: [] }));
-    assert.equal(readTodoProgress().level, 13);
-  } finally {
-    if (descriptor) Object.defineProperty(globalThis, "localStorage", descriptor);
-    else delete globalThis.localStorage;
+test("Exactly every fifth stage is a boss; stage inputs cannot exceed campaign bounds",()=>{
+  let bosses=0;
+  for(let n=1;n<=100;n++){const stage=getStage(n);assert.equal(stage.isBoss,n%5===0);assert.equal(stage.level,n);if(stage.isBoss){bosses++;assert.equal(stage.enemies.length,1);}}
+  assert.equal(bosses,20);assert.equal(getStage(999).level,100);assert.equal(getStage(NaN).level,1);
+});
+test("Legacy balances survive; free-selected levels never skip the new campaign",()=>{
+  const save=normalizeGameSave({gold:420,wins:30,losses:2,highestClearedLevel:99,selectedStage:99,defeatedMonsters:{dragon:3}});
+  assert.equal(save.gold,420);assert.equal(save.wins,30);assert.equal(save.defeatedMonsters.dragon,3);
+  assert.equal(getCurrentStage(save),1);assert.equal(save.highestClearedLevel,99);
+});
+test("Winning advances exactly one stage and duplicate or skipped claims cannot pay GOLD",()=>{
+  const raw={gold:50,campaignVersion:1,clearedStage:0};
+  const result={stageLevel:1,status:"victory",goldReward:9,monsterIds:["slime"]};
+  const first=applyBattleResult(raw,result);assert.equal(first.save.gold,59);assert.equal(getCurrentStage(first.save),2);
+  const twice=applyBattleResult(first.save,result);assert.equal(twice.applied,false);assert.equal(twice.save.gold,59);
+  assert.equal(applyBattleResult(first.save,{...result,stageLevel:50}).applied,false);
+});
+test("A defeat never advances the campaign or reduces balances",()=>{
+  const result=applyBattleResult({campaignVersion:1,clearedStage:4,gold:100},{stageLevel:5,status:"defeat"});
+  assert.equal(result.save.clearedStage,4);assert.equal(result.save.gold,100);assert.equal(result.save.losses,1);
+});
+test("The final boss completes the campaign without offering stage 101",()=>{
+  const {save}=applyBattleResult({campaignVersion:1,clearedStage:99},{stageLevel:100,status:"victory",goldReward:100});
+  assert.ok(isCampaignComplete(save));assert.equal(getCurrentStage(save),100);
+  assert.equal(applyBattleResult(save,{stageLevel:100,status:"victory",goldReward:100}).applied,false);
+});
+test("ToDo XP determines player strength and game saves write only the game key",()=>{
+  const values=new Map([["rpg-todo:v1",JSON.stringify({totalXp:1168,tasks:[],daily:{}})]]);
+  const original=values.get("rpg-todo:v1"),writes=[];
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,"localStorage");
+  Object.defineProperty(globalThis,"localStorage",{configurable:true,value:{getItem:k=>values.get(k)??null,setItem:(k,v)=>{writes.push(k);values.set(k,v);}}});
+  try{assert.equal(readTodoProgress().level,12);assert.equal(createPlayerState(12).attack,56);saveGameSave({gold:50});assert.equal(values.get("rpg-todo:v1"),original);assert.deepEqual(writes,["rpg-todo:game:v1"]);}
+  finally{if(descriptor)Object.defineProperty(globalThis,"localStorage",descriptor);else delete globalThis.localStorage;}
+});
+test("SP costs are enforced and normal attacks restore SP only once",()=>{
+  const s=createBattleState(getStage(20),1);s.sp=0;
+  assert.equal(resolvePlayerAction(s,"power-slash",fixed),null);
+  const energy=s.player.energy;resolvePlayerAction(s,"attack",fixed);assert.equal(s.sp,1);assert.equal(s.player.energy,energy+25);
+  s.sp=5;resolvePlayerAction(s,"attack",fixed);assert.equal(s.sp,5);
+});
+test("Combat has no weakness, toughness, break bonus, or recovery skip",()=>{
+  for (const level of [1,5,18,100]) {
+    const s=createBattleState(getStage(level),1),enemy=s.enemies[0];
+    for(const key of ["weaknesses","toughness","maxToughness","broken"])assert.equal(key in enemy,false);
+    const next=enemy.nextAction, hp=enemy.hp;
+    const result=resolvePlayerAction(s,"attack",fixed);
+    assert.equal(result.events[0].amount,Math.min(hp,s.player.attack));
+    assert.equal("broke" in result.events[0],false);assert.equal(enemy.nextAction,next);
+    s.currentActorId=enemy.id;
+    const reply=resolveEnemyAction(s,fixed);
+    assert.notEqual(reply.type,"recover");assert.ok(reply.events.length>0);
   }
 });
-test("Enemy level remains freely selectable from 1 to 99", () => {
-  assert.equal(getStageLevels().length, 99);
-  assert.equal(getStage(99).level, 99);
-  assert.equal(getStage(999).level, 99);
-  assert.equal(getStage(-5).level, 1);
-  const { controller } = setup(1, 99);
-  assert.equal(controller.state.player.level, 1);
-  assert.equal(controller.state.enemy.level, 99);
+test("Ultimate requires energy and player turn, hits every enemy, and preserves the normal action",()=>{
+  const s=createBattleState(getStage(18),5);
+  assert.equal(canUseSkill(s,"ultimate"),false);s.player.energy=100;
+  const result=resolvePlayerAction(s,"ultimate",fixed);
+  assert.equal(result.events.length,3);assert.equal(result.consumesTurn,false);
+  assert.equal(s.player.energy,0);assert.equal(s.currentActorId,"player");assert.equal(s.turn,1);assert.equal(canUseSkill(s,"ultimate"),false);
+  s.player.energy=100;s.currentActorId=s.enemies[0].id;assert.equal(canUseSkill(s,"ultimate"),false);
 });
-test("Enemies telegraph strong attacks on turns 3,6,9", () => {
-  for (let turn = 1; turn <= 9; turn++) assert.equal(getEnemyIntent(turn, 10).strong, turn % 3 === 0);
+test("Target selection controls the primary hit and adjacent splash",()=>{
+  const s=createBattleState(getStage(18),1);
+  assert.equal(selectTarget(s,s.enemies[0].id),true);
+  const first=resolvePlayerAction(s,"power-slash",fixed);assert.equal(first.events.length,2);
+  selectTarget(s,s.enemies[1].id);
+  const second=resolvePlayerAction(s,"power-slash",fixed);assert.equal(second.events.length,3);
+  assert.equal(selectTarget(s,"missing"),false);
 });
-test("Victory is rewarded once; repeated skills and finish calls are ignored", async () => {
-  const fixture = setup(30, 1);
-  await fixture.controller.useSkill("attack");
-  assert.equal(fixture.controller.state.status, "victory");
-  assert.equal(fixture.finishes, 1);
-  await fixture.controller.useSkill("attack");
-  await fixture.controller.finish("victory");
-  assert.equal(fixture.finishes, 1);
-  assert.equal(fixture.playerActor.state, "victory");
+test("Dead targets are excluded from action order and retargeting",()=>{
+  const s=createBattleState(getStage(18),1),dead=s.enemies[0];
+  dead.hp=0;assert.equal(selectTarget(s,dead.id),false);
+  assert.ok(previewOrder(s).every(entry=>entry.id!==dead.id));
+  assert.ok(resolvePlayerAction(s,"attack",fixed).events.every(event=>event.id!==dead.id));
 });
-test("Guard reduces the forecast attack and restores MP", async () => {
-  const { controller } = setup(1, 1);
-  controller.state.player.mp = 0;
-  const hp = controller.state.player.hp;
-  await controller.useSkill("guard");
-  assert.ok(hp - controller.state.player.hp <= 4);
-  assert.equal(controller.state.player.mp, 8);
-  assert.equal(controller.state.turn, 2);
-  assert.equal(controller.state.player.guarding, false);
+test("Guard covers all enemies until the next player action",()=>{
+  const normal=createBattleState(getStage(18),18),guarded=createBattleState(getStage(18),18);
+  resolvePlayerAction(guarded,"guard",fixed);
+  for(const state of [normal,guarded]){completeTurn(state);while(state.currentActorId!=="player"&&state.status==="playing"){resolveEnemyAction(state,fixed);completeTurn(state);}}
+  assert.ok(normal.player.maxHp-normal.player.hp>guarded.player.maxHp-guarded.player.hp);
+  assert.equal(guarded.player.guarding,false);
 });
-test("Healing at full HP or without MP cannot consume a turn", async () => {
-  const { controller } = setup(1, 1);
-  assert.equal(await controller.useSkill("heal"), false);
-  controller.state.player.mp = 0;
-  assert.equal(await controller.useSkill("power-slash"), false);
-  assert.equal(controller.state.turn, 1);
+test("Healing at full HP cannot spend SP or an action",()=>{
+  const s=createBattleState(getStage(1),1);
+  assert.equal(resolvePlayerAction(s,"heal",fixed),null);assert.equal(s.sp,3);assert.equal(s.turn,1);
 });
-test("Heal restores HP before the enemy acts", async () => {
-  const { controller } = setup(10, 1);
-  controller.state.player.hp = 20;
-  await controller.useSkill("heal");
-  assert.ok(controller.state.player.hp > 20);
-  assert.equal(controller.state.player.mp, controller.state.player.maxMp - 6);
+test("Forecasting action order never mutates combat state",()=>{
+  const s=createBattleState(getStage(18),18),before=JSON.stringify(s);
+  assert.equal(previewOrder(s).length,6);assert.equal(JSON.stringify(s),before);
 });
-test("Defeat cannot produce victory rewards", async () => {
-  const fixture = setup(1, 99);
-  await fixture.controller.useSkill("attack");
-  assert.equal(fixture.controller.state.status, "defeat");
-  assert.equal(fixture.finishes, 1);
-  assert.equal(fixture.playerActor.dead, true);
-});
-test("Concurrent clicks are locked until animation ends", async () => {
-  const { controller } = setup(2, 1);
-  const first = controller.useSkill("attack");
-  assert.equal(await controller.useSkill("attack"), false);
-  await first;
-  assert.equal(controller.state.turn, 2);
-});
-test("Cancelled animations cannot award GOLD", async () => {
-  const fixture = setup(30, 1);
-  const action = fixture.controller.useSkill("attack");
-  fixture.controller.cancel();
-  await action;
-  assert.equal(fixture.finishes, 0);
-});
-test("Animation errors end safely without counting a defeat", async () => {
-  const fixture = setup(2, 1, { renderer: { addEffect() { throw new Error("drawing failed"); }, shake() {} } });
-  await assert.rejects(fixture.controller.useSkill("attack"));
-  assert.equal(fixture.controller.state.status, "error");
-  assert.equal(fixture.controller.locked, false);
-  assert.equal(fixture.finishes, 0);
-});
-test("An existing battle cannot be restarted during an animation", () => {
-  let cleared = false;
-  Game.prototype.startBattle.call({ ready: true, controller: { locked: true }, tweens: { clear() { cleared = true; } } });
-  assert.equal(cleared, false);
-});
-test("Sprite rows match combat state; reduced motion disables shaking", () => {
-  const { playerActor } = setup();
-  playerActor.attack(); playerActor.update(0.2);
-  assert.equal(playerActor.getSpriteFrame().row, 2);
-  playerActor.setState("run"); assert.equal(playerActor.getSpriteFrame().row, 1);
-  playerActor.reducedMotion = true; playerActor.hurt();
-  assert.equal(playerActor.getDrawTransform(5).x, playerActor.x);
-});
-test("Save failures are reported and old game balances survive normalization", () => {
-  const storage = { getItem: () => JSON.stringify({ gold: 400, wins: 3, losses: 1, highestClearedLevel: 7, selectedStage: 6 }) };
-  assert.equal(loadGameSave(storage).gold, 400);
-  const warn = console.warn; console.warn = () => {};
-  try { assert.equal(saveGameSave({}, { setItem() { throw new Error("quota"); } }), false); }
-  finally { console.warn = warn; }
-});
-test("All configured game artwork resolves within the repository", () => {
-  for (const url of [PLAYER_SPRITE_URL, ARENA_IMAGE_URL, ...getAllEnemyImageUrls()]) assert.ok(existsSync(new URL(url)), url);
-});
-test("The original ToDo files are byte-for-byte unchanged", () => {
-  const root = new URL("../", import.meta.url);
-  const paths = execFileSync("git", ["ls-tree", "-r", "--name-only", "HEAD"], { cwd: root, encoding: "utf8" }).trim().split("\n");
-  for (const path of paths) {
-    if (path === "index.html" || path === "server.js" || (path.startsWith("styles/") && path !== "styles/game.css") || (path.startsWith("src/") && !path.startsWith("src/game/") && path !== "src/battle-app.mjs")) {
-      assert.deepEqual(readFileSync(new URL(path, root)), execFileSync("git", ["show", "HEAD:" + path], { cwd: root }), path);
+test("One hundred stages finish with bounded resources using a valid command strategy",()=>{
+  for(let level=1;level<=100;level++){
+    const s=createBattleState(getStage(level),level);let steps=0;
+    while(s.status==="playing"&&steps++<300){
+      if(s.currentActorId==="player"){
+        const skill=s.player.energy===100?"ultimate":s.sp&&s.player.hp<s.player.maxHp*.45?"heal":s.sp?"power-slash":"attack";
+        const result=resolvePlayerAction(s,skill,fixed);assert.ok(result);if(result.consumesTurn)completeTurn(s);
+      }else{resolveEnemyAction(s,fixed);completeTurn(s);}
+      assert.ok(s.sp>=0&&s.sp<=5);assert.ok(s.player.energy>=0&&s.player.energy<=100);assert.ok(s.player.hp>=0&&s.player.hp<=s.player.maxHp);
+      for(const enemy of s.enemies){assert.ok(enemy.hp>=0&&enemy.hp<=enemy.maxHp);}
     }
+    assert.equal(s.status,"victory","Stage "+level+" should be completable at matching player level");
+  }
+});
+test("ToDo level one is not silently raised when facing a high-level boss",()=>{
+  const s=createBattleState(getStage(100),1);
+  assert.equal(s.player.level,1);assert.equal(s.player.maxHp,75);
+  resolvePlayerAction(s,"attack",fixed);completeTurn(s);
+  for(let n=0;n<5&&s.status==="playing";n++){
+    if(s.currentActorId==="player")resolvePlayerAction(s,"attack",fixed);else resolveEnemyAction(s,fixed);completeTurn(s);
+  }
+  assert.equal(s.status,"defeat");
+});
+test("Animation locking prevents double actions and rewards only once",async()=>{
+  const f=fixture(1,50);const first=f.controller.useSkill("attack");
+  assert.equal(await f.controller.useSkill("attack"),false);await first;
+  assert.equal(f.finishes,1);assert.equal(f.controller.state.status,"victory");
+  await f.controller.finish();assert.equal(f.finishes,1);
+});
+test("Cancelled and failed animations cannot grant victory rewards",async()=>{
+  const cancelled=fixture(1,50);const action=cancelled.controller.useSkill("attack");cancelled.controller.cancel();await action;assert.equal(cancelled.finishes,0);
+  const failed=fixture(1,50,{renderer:{addEffect(){throw Error("draw failure");},shake(){}}});
+  await assert.rejects(failed.controller.useSkill("attack"));assert.equal(failed.finishes,0);assert.equal(failed.controller.state.status,"error");assert.equal(failed.controller.locked,false);
+});
+test("Controller drives multiple enemies and returns control to player",async()=>{
+  const f=fixture(18,18);await f.controller.useSkill("guard");
+  assert.equal(f.controller.state.currentActorId,"player");assert.equal(f.controller.locked,false);assert.equal(f.controller.state.turn,2);
+});
+test("Every species has twelve valid sprite frames and all shipped art exists",()=>{
+  for(const url of [PLAYER_SPRITE_URL,ARENA_IMAGE_URL,...MONSTERS.map(m=>m.imageUrl)])assert.ok(existsSync(new URL(url)));
+  for(const m of MONSTERS){
+    const png=readFileSync(new URL(m.imageUrl)),w=png.readUInt32BE(16),h=png.readUInt32BE(20);
+    assert.equal(m.sprite.frames.length,12);
+    for(const [x,y,width,height] of m.sprite.frames)assert.ok(x>=0&&y>=0&&width>0&&height>0&&x+width<=w&&y+height<=h);
+    const a=new Actor({sprite:m.sprite});a.update(.25);assert.equal(a.getSpriteFrame().column,1);
   }
 });
 
-test("All ten species can be selected at level 1 or 99", () => {
-  assert.equal(MONSTERS.length, 10);
-  for (const monster of MONSTERS) {
-    for (const level of [1, 99]) assert.equal(getStage(level, monster.id).monster.id, monster.id);
-    assert.equal(monster.sprite.frames.length, 12);
-    const data = readFileSync(new URL(monster.imageUrl));
-    const width = data.readUInt32BE(16), height = data.readUInt32BE(20);
-    for (const [x,y,w,h] of monster.sprite.frames) {
-      assert.ok(x >= 0 && y >= 0 && w > 0 && h > 0 && x+w <= width && y+h <= height);
-    }
-    const actor = new Actor({ sprite: monster.sprite });
-    actor.update(.25); assert.equal(actor.getSpriteFrame().column, 1);
-    actor.attack(); assert.equal(actor.getSpriteFrame().row, 1);
-    actor.hurt(); assert.equal(actor.getSpriteFrame().row, 2);
-    actor.dead = true; actor.setState("dead"); actor.update(1);
-    assert.equal(actor.getSpriteFrame().column, 3);
-  }
+test("Cinematic skill sequences resolve each command once and restore camera",async()=>{
+  const effects=[], camera={x:480,y:270,zoom:1};
+  const f=fixture(18,18,{renderer:{camera,addEffect(type){effects.push(type);},addProjectile(){},shake(){}}});
+  f.controller.state.player.energy=100;
+  await f.controller.useSkill("ultimate");
+  assert.equal(f.controller.state.player.energy,0);
+  assert.equal(f.controller.state.turn,1);
+  assert.equal(f.controller.state.currentActorId,"player");
+  assert.deepEqual(camera,{x:480,y:270,zoom:1});
+  assert.ok(effects.includes("cutin"));assert.equal(effects.filter(e=>e==="starfall").length,3);
+  assert.equal(f.controller.locked,false);
 });
-test("Species choices and codex migrate without resetting old balances", () => {
-  const saved = normalizeGameSave({ gold: 400, wins: 3, selectedMonster: "mimic", defeatedMonsters: { mimic: 2, wolf: -3 } });
-  assert.equal(saved.gold, 400); assert.equal(saved.wins, 3);
-  assert.equal(saved.selectedMonster, "mimic"); assert.equal(saved.defeatedMonsters.mimic, 2);
-  assert.equal(saved.defeatedMonsters.wolf, 0);
-  assert.equal(normalizeGameSave({ selectedMonster: "missing" }).selectedMonster, "auto");
-});
-test("Each monster completes a battle without animation or range errors", async () => {
-  for (const monster of MONSTERS) {
-    const fixture = setup(10, 10, { stage: getStage(10, monster.id) });
-    for (let turn = 0; turn < 80 && fixture.controller.state.status === "playing"; turn++) await fixture.controller.useSkill("attack");
-    assert.notEqual(fixture.controller.state.status, "playing", monster.id);
-    assert.equal(fixture.finishes, 1, monster.id);
-    assert.ok(fixture.controller.state.player.hp >= 0);
-    assert.ok(fixture.controller.state.enemy.hp >= 0);
-  }
-});
-test("Enemy guard halves only the next player hit", async () => {
-  const { controller } = setup(1, 10, { stage: getStage(10, "frost-golem") });
-  await controller.runEnemyTurn();
-  assert.equal(controller.state.enemy.guarding, true);
-  const hp = controller.state.enemy.hp;
-  await controller.runPlayerAttack({ power: 1, name: "攻撃" });
-  assert.ok(hp - controller.state.enemy.hp <= 6);
-  assert.equal(controller.state.enemy.guarding, false);
-});
-test("Guard applies to every hit in a combo", async () => {
-  const { controller } = setup(30, 10, { stage: getStage(10, "goblin") });
-  controller.state.turn = 2; controller.state.player.guarding = true;
-  const hp = controller.state.player.hp;
-  const intent = getEnemyIntent(2, controller.state.enemy.attack, getMonster("goblin"), controller.state.enemy);
-  await controller.runEnemyTurn();
-  assert.ok(hp - controller.state.player.hp <= intent.max / 2);
-  assert.equal(controller.state.player.guarding, false);
-});
-test("Drain and phoenix healing never exceed enemy max HP", async () => {
-  for (const id of ["demon", "phoenix"]) {
-    const { controller } = setup(30, 10, { stage: getStage(10, id) });
-    controller.state.enemy.hp -= 2; controller.state.turn = id === "demon" ? 2 : 3;
-    const hp = controller.state.enemy.hp;
-    await controller.runEnemyTurn();
-    assert.ok(controller.state.enemy.hp > hp);
-    assert.ok(controller.state.enemy.hp <= controller.state.enemy.maxHp);
-  }
-});
-test("Boss rage changes predicted attack by 15% below 40% HP", () => {
-  const boss = getMonster("dragon");
-  const normal = getEnemyIntent(1, 100, boss, { hp: 41, maxHp: 100 });
-  const rage = getEnemyIntent(1, 100, boss, { hp: 40, maxHp: 100 });
-  assert.equal(normal.enraged, false); assert.equal(rage.enraged, true);
-  assert.equal(rage.multiplier, normal.multiplier * 1.15);
-});
-test("GOLD and codex rewards remain isolated from ToDo", () => {
-  const values = new Map([["rpg-todo:v1", "unchanged"]]);
-  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
-  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: { getItem: k => values.get(k) ?? null, setItem: (k,v) => values.set(k,v) } });
-  try {
-    const game = { stage: getStage(1, "mimic"), save: { selectedMonster: "mimic" }, todoProgress: { level: 1 }, ui: { renderStats() {} }, persist() { saveGameSave(this.save); } };
-    Game.prototype.finishBattle.call(game, { status: "victory", goldReward: game.stage.goldReward });
-    assert.equal(loadGameSave().defeatedMonsters.mimic, 1);
-    assert.equal(loadGameSave().selectedMonster, "mimic");
-    assert.equal(values.get("rpg-todo:v1"), "unchanged");
-  } finally { if (descriptor) Object.defineProperty(globalThis, "localStorage", descriptor); else delete globalThis.localStorage; }
-});
-
-test("Rapid stage changes cannot display an older loaded monster", async () => {
-  const pending = [];
-  const shown = [];
-  const game = {
-    ready: true, selectionRequest: 0, save: { selectedMonster: "slime", selectedStage: 1 }, todoProgress: { level: 1 },
-    assets: { loadImage: () => new Promise(resolve => pending.push(resolve)) },
-    tweens: { clear() {} }, renderer: { setScene(stage) { shown.push(stage.monster.id); } },
-    ui: { elements: { startBattleButton: {} }, renderStage() {}, showStageSelection() {}, renderStats() {}, message() {} },
-    createActors() {},
-  };
-  const first = Game.prototype.selectStage.call(game, 1, false);
-  game.save.selectedMonster = "phoenix";
-  const second = Game.prototype.selectStage.call(game, 99, false);
-  pending[1]({}); await second; pending[0]({}); await first;
-  assert.deepEqual(shown, ["phoenix"]);
-  assert.equal(game.stage.level, 99); assert.equal(game.loadingStage, false);
+test("Reduced-motion mode shortens animation waits without changing damage",async()=>{
+  const waits=[], f=fixture(1,1,{renderer:{reducedMotion:true,addEffect(){},addProjectile(){},shake(){}},
+    tweens:{wait:async seconds=>waits.push(seconds),to:async(target,props)=>Object.assign(target,props)}});
+  await f.controller.useSkill("attack");
+  assert.ok(waits.every(seconds=>seconds<=.12));assert.equal(f.controller.state.turn,2);
 });

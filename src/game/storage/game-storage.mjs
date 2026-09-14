@@ -1,13 +1,16 @@
 import { GAME_STORAGE_KEY, MAX_BATTLE_LEVEL, CAMPAIGN_VERSION } from "../config.mjs";
 import { MONSTERS } from "../data/monsters.mjs";
 
+import { normalizeInventory } from "../data/equipment.mjs";
+
 const integer = (v, fallback = 0) => Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : fallback;
 export function createGameSave() {
-  return { gold: 0, wins: 0, losses: 0, highestClearedLevel: 0, defeatedMonsters: {}, campaignVersion: CAMPAIGN_VERSION, clearedStage: 0 };
+  return { gold: 0, wins: 0, losses: 0, highestClearedLevel: 0, defeatedMonsters: {}, campaignVersion: CAMPAIGN_VERSION, clearedStage: 0, inventory: normalizeInventory(null) };
 }
 export function normalizeGameSave(raw) {
   if (!raw || typeof raw !== "object") return createGameSave();
   return {
+    inventory: normalizeInventory(raw.inventory),
     gold: integer(raw.gold), wins: integer(raw.wins), losses: integer(raw.losses),
     highestClearedLevel: integer(raw.highestClearedLevel),
     defeatedMonsters: Object.fromEntries(MONSTERS.map(m => [m.id, integer(raw.defeatedMonsters?.[m.id])])),

@@ -11,6 +11,8 @@ import { CanvasRenderer } from "./rendering/canvas-renderer.mjs";
 import { loadGameSave, saveGameSave, getCurrentStage, isCampaignComplete, applyBattleResult } from "./storage/game-storage.mjs";
 import { GameUI } from "./ui/game-ui.mjs";
 
+import { equipmentBonuses, purchaseEquipment, equipItem } from "./data/equipment.mjs";
+
 export class Game {
   constructor(root) {
     this.root = root; this.assets = new AssetLoader(); this.tweens = new TweenManager();
@@ -21,6 +23,7 @@ export class Game {
   async start() {
     this.todoProgress = readTodoProgress(); this.save = loadGameSave();
     this.ui = new GameUI(this.root, {
+      buyItem: id => this.updateEquipment(id, true), equipItem: id => this.updateEquipment(id, false),
       startBattle: () => this.startBattle(), nextStage: () => this.prepareStage(),
       retry: () => this.startBattle(), returnToCamp: () => this.prepareStage(),
       useSkill: id => this.useSkill(id), selectTarget: id => this.controller?.selectTarget(id),
@@ -93,13 +96,26 @@ export class Game {
     this.save = latest; this.todoProgress = readTodoProgress();
     this.controller?.cancel(); this.tweens.clear(); this.createActors();
     this.controller = new BattleController({
-      stage: this.stage, playerLevel: this.todoProgress.level, playerActor: this.playerActor, enemyActors: this.enemyActors,
+      stage: this.stage, playerLevel: this.todoProgress.level, bonuses: equipmentBonuses(this.save.inventory), playerActor: this.playerActor, enemyActors: this.enemyActors,
       tweens: this.tweens, renderer: this.renderer, audio: this.audio,
       onChange: (state, locked) => this.ui.renderBattle(state, locked),
       onFinish: state => this.finishBattle(state),
     });
     this.ui.renderStats(this.todoProgress.level, this.save);
     this.ui.showBattle(); this.controller.notify();
+  }
+  async updateEquipment(id, buy) {
+    if (this.controller?.locked || this.controller?.state.status === "playing") return;
+    const commit=()=>{
+      if (this.controller?.locked || this.controller?.state.status === "playing") return;
+      if (this.storageFailed) { this.ui.message("遠征記録を保存できていないため、装備変更を中止しました。"); return; }
+      const latest=loadGameSave();
+      const result=buy?purchaseEquipment(latest,id):equipItem(latest,id);
+      if(!result.ok){this.ui.message(result.message);return;}
+      if(!saveGameSave(latest)){this.ui.message("装備を保存できませんでした。購入は確定していません。");return;}
+      this.save=latest;this.ui.renderStats(this.todoProgress.level,this.save);this.ui.message(result.message);
+    };
+    if(globalThis.navigator?.locks?.request)await navigator.locks.request("rpg-todo:campaign-save",commit);else commit();
   }
   async useSkill(id) {
     try { await this.controller?.useSkill(id); }

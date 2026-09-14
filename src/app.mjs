@@ -47,6 +47,9 @@ import {
   renderQuestList,
 } from "./ui/quests.mjs";
 
+import { createTaskEditor } from "./features/tasks/editor.mjs";
+let taskEditor;
+
 let state = createDefaultState();
 let elements = {};
 
@@ -84,6 +87,7 @@ function updateTodayLabel() {
 
 function render() {
   const questActions = {
+    editTask: id => taskEditor.open(id),
     toggleTask:
       handleToggleTask,
 
@@ -288,6 +292,8 @@ function handleAddTask(
     addTask(
       state,
       {
+        dueDate: formData.get("dueDate"),
+        note: formData.get("note"),
         title:
           formData.get(
             "title",
@@ -656,7 +662,7 @@ function bindEvents() {
     elements.quickTaskTitle.focus();
   });
   elements.questSearch?.addEventListener("input", () => {
-    renderQuestList(elements, state, { toggleTask: handleToggleTask, deleteTask: handleDeleteTask, openQuest: handleOpenQuest });
+    renderQuestList(elements, state, { toggleTask: handleToggleTask, deleteTask: handleDeleteTask, openQuest: handleOpenQuest, editTask: id => taskEditor.open(id) });
   });
   elements.openQuestButton
     .addEventListener(
@@ -767,6 +773,7 @@ function bindEvents() {
 
               deleteTask:
                 handleDeleteTask,
+              editTask: id => taskEditor.open(id),
             },
           );
 
@@ -782,6 +789,7 @@ function bindEvents() {
 
 function init() {
   cacheElements();
+  taskEditor = createTaskEditor({getState:()=>state,onCommit:()=>{const result=persist();render();return result;},onRefresh:render,notify:(title,detail)=>showToast(elements,title,detail,"✓")});
 
   state =
     loadState();
@@ -792,6 +800,10 @@ function init() {
 
   updateTodayLabel();
   bindEvents();
+  window.addEventListener("storage", event => {
+    if (event.key === "rpg-todo:v1" || event.key === null) { state = loadState(); generateTodayTasks(state); render(); }
+  });
+  window.addEventListener("pageshow", event => { if (event.persisted) location.reload(); });
 
   persist();
   render();

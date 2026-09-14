@@ -13,6 +13,7 @@ const port =
     : 8080;
 
 const mimeTypes = new Map([
+  [".webmanifest", "application/manifest+json; charset=utf-8"],
   [".html", "text/html; charset=utf-8"],
   [".css", "text/css; charset=utf-8"],
   [".js", "text/javascript; charset=utf-8"],
@@ -36,7 +37,7 @@ function resolvePublicFile(pathname) {
   const decodedPath = decodeURIComponent(pathname);
   const relativePath =
     decodedPath === "/" ? "index.html" : decodedPath.replace(/^\/+/, "");
-  const rootPages = new Set(["index.html", "battle.html"]);
+  const rootPages = new Set(["index.html", "battle.html", "settings.html", "manifest.webmanifest", "sw.js", "offline-files.js"]);
   const isRootPage = rootPages.has(relativePath);
   const isPublicAsset =
     relativePath.startsWith("src/") ||

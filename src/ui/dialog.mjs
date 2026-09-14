@@ -6,6 +6,7 @@ import {
 import { setText } from "./helpers.mjs";
 
 export function updateRewardPreview(elements) {
+  elements.questForm.querySelectorAll("[data-single-task]").forEach(input => { input.disabled = Boolean(elements.repeatDaily?.checked); });
   const difficulty = clampDifficulty(
     elements.questForm.elements.difficulty.value,
   );

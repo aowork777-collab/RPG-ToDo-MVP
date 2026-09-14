@@ -2,11 +2,11 @@ import { getSkill } from "../data/skills.mjs";
 import { createPlayerState, getEnemyIntent } from "./combat-rules.mjs";
 
 const tick = unit => 10000 / unit.speed;
-export function createBattleState(stage, playerLevel) {
+export function createBattleState(stage, playerLevel, bonuses = {}) {
   return {
     status: "playing", phase: "player", turn: 1, now: 0, currentActorId: "player",
     stageLevel: stage.level, isBoss: stage.isBoss, goldReward: stage.goldReward,
-    player: createPlayerState(playerLevel), sp: 3, maxSp: 5,
+    player: createPlayerState(playerLevel, bonuses), sp: 3, maxSp: 5,
     enemies: stage.enemies.map(e => ({ ...e, hp: e.maxHp, guarding: false, actionCount: 1, nextAction: 5000 / e.speed })),
     selectedTargetId: stage.enemies[0].id,
     log: ["STAGE " + stage.level + (stage.isBoss ? " / BOSS" : ""), "通常攻撃でSPを回復。エネルギー100で必殺技が使える。"],

@@ -88,6 +88,8 @@ export function addTask(state, values) {
     title,
     difficulty,
     dueTime: String(values.dueTime || ""),
+    dueDate: String(values.dueDate || ""),
+    note: String(values.note || "").trim().slice(0,500),
     isBoss,
     completed: false,
     reward: isBoss ? BOSS_REWARD : calculateTaskReward(difficulty, false),

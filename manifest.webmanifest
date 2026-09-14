@@ -1,0 +1,42 @@
+{
+  "id": "./",
+  "name": "RPG ToDo — 日々の達成を冒険へ",
+  "short_name": "RPG ToDo",
+  "description": "タスクの達成で育てたレベルを使って冒険するToDoアプリ",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101723",
+  "theme_color": "#101723",
+  "icons": [
+    {
+      "src": "./assets/app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "タスクを開く",
+      "url": "./index.html"
+    },
+    {
+      "name": "冒険へ",
+      "url": "./battle.html"
+    }
+  ]
+}

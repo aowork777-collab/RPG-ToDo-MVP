@@ -6,7 +6,7 @@ import { createBattleState, canUseSkill, selectTarget, selectedEnemy, resolvePla
 export class BattleController {
   constructor(options) {
     Object.assign(this, options);
-    this.state = createBattleState(this.stage, options.playerLevel);
+    this.state = createBattleState(this.stage, options.playerLevel, options.bonuses);
     this.animator = new SkillAnimator(this);
     this.locked = false; this.cancelled = false; this.rewarded = false;
   }

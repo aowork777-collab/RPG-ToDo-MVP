@@ -5,6 +5,8 @@ import { getEnemyIntent, previewDamage } from "../battle/combat-rules.mjs";
 import { canUseSkill, selectedEnemy, previewOrder } from "../battle/battle-engine.mjs";
 import { isCampaignComplete } from "../storage/game-storage.mjs";
 
+import { renderEquipmentShop } from "./equipment-ui.mjs";
+
 const text = (node,value) => { node.textContent = String(value); };
 const make = (tag,className,value = "") => { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; };
 function bar(node,current,max) { node.style.width = Math.max(0,Math.min(100,current / max * 100)) + "%"; }
@@ -67,6 +69,7 @@ export class GameUI {
           <details class="battle-log-details"><summary>戦闘ログ <span id="lastLog"></span></summary><ol id="gameBattleLog" class="game-battle-log"></ol></details>
         </section>
       </section>
+      <details class="equipment-shop" open><summary>装備工房 <span>GOLDで冒険を強化</span></summary><div id="equipmentShop"></div></details>
       <details class="game-guide"><summary>戦闘の遊び方</summary><div>
         <p>通常攻撃でSPを1回復。戦闘スキル・回復スキルはSPを1消費します。SPは最大5です。</p>
         <p>攻撃や被弾でエネルギーがたまります。100で必殺技が使用可能。自分のターンに使用でき、使った後も通常の行動を選べます。</p>
@@ -117,6 +120,7 @@ export class GameUI {
   }
   renderStats(level,save) {
     this.save = save; const e = this.elements;
+    renderEquipmentShop(e.equipmentShop,save,this.actions,Boolean(this.battleActive));
     text(e.gamePlayerLevel,level); text(e.gameGold,save.gold.toLocaleString("ja-JP"));
     text(e.gameProgress,save.clearedStage + " / " + MAX_BATTLE_LEVEL); text(e.gameWins,save.wins);
     text(e.codexProgress,MONSTERS.filter(m => save.defeatedMonsters?.[m.id] > 0).length + " / " + MONSTERS.length);
@@ -129,6 +133,7 @@ export class GameUI {
   }
   showCamp(stage,save,loading) {
     const e = this.elements, complete = isCampaignComplete(save);
+    this.battleActive=false;renderEquipmentShop(e.equipmentShop,save,this.actions,false);
     e.campControls.hidden = false; e.battleControls.hidden = true; e.arenaCaption.hidden = false; e.orderPanel.hidden = true;
     text(e.stageLabel,"STAGE " + String(stage.level).padStart(2,"0")); text(e.arenaRegion,stage.region); e.bossBadge.hidden = !stage.isBoss;
     text(e.stageTitle,complete ? "遠征を制覇しました" : stage.title);
@@ -147,6 +152,7 @@ export class GameUI {
     }
   }
   showBattle() {
+    this.battleActive=true;renderEquipmentShop(this.elements.equipmentShop,this.save,this.actions,true);
     const e=this.elements; e.campControls.hidden=true; e.battleControls.hidden=false; e.arenaCaption.hidden=true; e.orderPanel.hidden=false;
     this.targetButtons.clear(); e.targetGrid.replaceChildren();
   }
@@ -210,6 +216,7 @@ export class GameUI {
     e.gameBattleLog.replaceChildren();
     state.log.forEach(line=>e.gameBattleLog.append(make("li","",line))); text(e.lastLog,state.log.at(-1) || "");
     if(finished) {
+      this.battleActive=false;renderEquipmentShop(e.equipmentShop,this.save,this.actions,false);
       const victory=state.status==="victory", complete=isCampaignComplete(this.save);
       text(e.resultLabel,victory ? state.isBoss ? "BOSS DEFEATED" : "STAGE CLEAR" : "TRY AGAIN");
       text(e.resultTitle,victory ? complete ? "遠征制覇" : "VICTORY" : state.status==="error" ? "戦闘を中断しました" : "DEFEAT");
