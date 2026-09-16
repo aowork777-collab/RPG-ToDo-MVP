@@ -1,4 +1,5 @@
 import { BOSS_REWARD } from "./config.mjs";
+import { recordCompletion } from "./features/habits/state.mjs";
 import {
   calculateTaskReward,
   clampDifficulty,
@@ -20,6 +21,7 @@ export function toggleTaskState(state, taskId) {
     task.completedAt = null;
     task.earnedXp = 0;
     task.reward = calculateTaskReward(task.difficulty, task.isBoss);
+    recordCompletion(state, task);
 
     return {
       task,
@@ -36,6 +38,7 @@ export function toggleTaskState(state, taskId) {
   task.completedAt = new Date().toISOString();
   task.earnedXp = earnedXp;
   state.totalXp += earnedXp;
+  recordCompletion(state, task);
 
   return {
     task,

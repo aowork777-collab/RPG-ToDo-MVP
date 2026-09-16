@@ -9,5 +9,7 @@ export const GAME_SKILLS = Object.freeze([
   { id: "guard", name: "防御", subtitle: "守りの構え", type: "guard", spCost: 0, spGain: 1, energy: 15, description: "次の自分の番まで被ダメージ半減" },
   { id: "heal", name: "回復スキル", subtitle: "星の息吹", type: "heal", healRate: .35, spCost: 1, spGain: 0, energy: 20, description: "最大HPの35%を回復" },
   { id: "ultimate", name: "必殺技", subtitle: "星天・一閃", type: "attack", element: "astral", power: 2.8, spCost: 0, spGain: 0, energy: 0, energyCost: 100, all: true, freeAction: true, description: "敵全体に大ダメージ · 行動を消費しない" },
+  { id: "star-rain", name: "拡張スキル", subtitle: "星雨の調べ", type: "attack", element: "astral", power: 1.3, spCost: 2, spGain: 0, energy: 35, all: true, unlockLevel: 5, description: "SP2で敵全体を攻撃 · ToDo LEVEL 5で解放" },
+  { id: "soul-blade", name: "上級スキル", subtitle: "月影の断刃", type: "attack", element: "lightning", power: 2.7, spCost: 2, spGain: 0, energy: 40, unlockLevel: 10, description: "SP2で単体に大ダメージ · ToDo LEVEL 10で解放" },
 ]);
 export function getSkill(id) { return GAME_SKILLS.find(skill => skill.id === id) ?? null; }

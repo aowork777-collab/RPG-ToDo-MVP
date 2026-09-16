@@ -1,3 +1,4 @@
+@import url("./habits.css");
 /* Shared app additions; game and task styles remain independent. */
 .global-settings-link {color:#d4c5a3!important;font-size:13px;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;}
 .settings-grid{max-width:880px;margin:auto;display:grid;gap:22px}.settings-intro>p:last-child{color:#b9c6d8}.settings-card{padding:26px}.settings-card h2{font-size:21px;margin:8px 0 12px}.settings-card>p{font-size:15px;line-height:1.8}.settings-card .settings-note{color:#aab8cb;font-size:13px}.settings-buttons{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.settings-status{color:#a6e7ce;white-space:pre-line}.file-button{position:relative;overflow:hidden;cursor:pointer}.file-button input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}.file-button:focus-within{outline:3px solid #91dfed;outline-offset:3px}

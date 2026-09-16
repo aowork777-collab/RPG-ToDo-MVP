@@ -12,6 +12,7 @@ import { loadGameSave, saveGameSave, getCurrentStage, isCampaignComplete, applyB
 import { GameUI } from "./ui/game-ui.mjs";
 
 import { equipmentBonuses, purchaseEquipment, equipItem } from "./data/equipment.mjs";
+import { relicBonuses } from "./data/chapters.mjs";
 
 export class Game {
   constructor(root) {
@@ -95,8 +96,9 @@ export class Game {
     if (getCurrentStage(latest) !== this.stage.level) { this.save = latest; this.prepareStage(); return; }
     this.save = latest; this.todoProgress = readTodoProgress();
     this.controller?.cancel(); this.tweens.clear(); this.createActors();
+    const equipment = equipmentBonuses(this.save.inventory), relic = relicBonuses(this.save.clearedStage);
     this.controller = new BattleController({
-      stage: this.stage, playerLevel: this.todoProgress.level, bonuses: equipmentBonuses(this.save.inventory), playerActor: this.playerActor, enemyActors: this.enemyActors,
+      stage: this.stage, playerLevel: this.todoProgress.level, bonuses: {attack: equipment.attack + relic.attack, hp: equipment.hp + relic.hp}, playerActor: this.playerActor, enemyActors: this.enemyActors,
       tweens: this.tweens, renderer: this.renderer, audio: this.audio,
       onChange: (state, locked) => this.ui.renderBattle(state, locked),
       onFinish: state => this.finishBattle(state),

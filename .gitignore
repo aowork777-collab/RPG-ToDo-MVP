@@ -1,0 +1,6 @@
+node_modules/
+supabase/.temp/
+artifacts/
+.env
+.env.*
+!.env.example

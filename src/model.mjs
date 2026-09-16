@@ -1,3 +1,4 @@
+import { normalizeHabits } from "./features/habits/state.mjs";
 import {
   createBattleInitialState,
   normalizeBattleState,
@@ -104,6 +105,7 @@ export function createDefaultState() {
     totalXp: 0,
     filter: "active",
     tasks: [],
+    habits: normalizeHabits(),
 
     daily:
       createDailyInitialState(),
@@ -228,6 +230,7 @@ export function normalizeTask(
     difficulty,
     dueDate: normalizeDateKey(rawTask.dueDate) || "",
     note: String(rawTask.note || "").slice(0,500),
+    originalTitle: String(rawTask.originalTitle || "").slice(0,60),
 
     dueTime:
       normalizeDueTime(
@@ -265,7 +268,7 @@ export function normalizeTask(
       completed
         ? normalizeIsoDate(
             rawTask.completedAt,
-            new Date().toISOString(),
+            null,
           )
         : null,
   };
@@ -322,6 +325,7 @@ export function normalizeState(
         : "active",
 
     tasks,
+    habits: normalizeHabits(rawState.habits, [...(Array.isArray(rawState.tasks) ? rawState.tasks : []), ...(Array.isArray(rawState.daily?.history) ? rawState.daily.history : [])]),
 
     daily:
       normalizeDailyState(

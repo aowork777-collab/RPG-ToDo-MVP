@@ -37,7 +37,7 @@ function resolvePublicFile(pathname) {
   const decodedPath = decodeURIComponent(pathname);
   const relativePath =
     decodedPath === "/" ? "index.html" : decodedPath.replace(/^\/+/, "");
-  const rootPages = new Set(["index.html", "battle.html", "settings.html", "manifest.webmanifest", "sw.js", "offline-files.js"]);
+  const rootPages = new Set(["index.html", "battle.html", "hub.html", "settings.html", "manifest.webmanifest", "sw.js", "offline-files.js"]);
   const isRootPage = rootPages.has(relativePath);
   const isPublicAsset =
     relativePath.startsWith("src/") ||

@@ -8,6 +8,12 @@ export class SkillAnimator {
   async beforeImpact(skill, target) {
     const c=this.c, player=c.playerActor, enemy=c.actor(target.id), fx=c.renderer;
     fx.addEffect("skill-title",0,0,skill.subtitle);
+    if(skill.id === "star-rain") {
+      player.setState("charge"); fx.addEffect("rune",player.x,player.y-95); c.audio?.play("charge");
+      await this.focus(520,285,1.1,.2); await c.pause(.3);
+      for(const actor of c.enemyActors.filter(a=>!a.dead)) {fx.addEffect("starfall",actor.x,actor.y-20); await c.pause(.12);}
+      c.audio?.play("slash"); await c.pause(.2); return;
+    }
     if(skill.id==="ultimate"){
       player.setState("charge");fx.addEffect("rune",player.x,player.y-95);
       c.audio?.play("charge");await this.focus(player.x+80,290,1.22,.25);
@@ -25,7 +31,7 @@ export class SkillAnimator {
       return;
     }
     if(skill.type==="attack"){
-      const special=skill.id==="power-slash";
+      const special=skill.id==="power-slash" || skill.id==="soul-blade";
       player.setState(special?"charge":"run");
       if(special){fx.addEffect("rune",player.x,player.y-100);c.audio?.play("charge");}
       await this.focus((player.homeX+enemy.x)/2,305,special?1.18:1.1,.16);
@@ -41,7 +47,7 @@ export class SkillAnimator {
         player.attack();fx.addEffect("blade-violet",enemy.x,enemy.y-80,"reverse");
         c.audio?.play("slash");
         const selectedIndex = c.state.enemies.findIndex(e => e.id === target.id);
-        const adjacentIds = c.state.enemies.filter((e,index) => e.hp > 0 && Math.abs(index-selectedIndex) === 1).map(e => e.id);
+        const adjacentIds = c.state.enemies.filter((e,index) => skill.splash && e.hp > 0 && Math.abs(index-selectedIndex) === 1).map(e => e.id);
         for(const actor of c.enemyActors.filter(a => adjacentIds.includes(a.id))){
           fx.addProjectile("shadow",enemy.x,enemy.y-80,actor.x,actor.y-80);
         }

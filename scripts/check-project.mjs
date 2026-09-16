@@ -10,7 +10,7 @@ for(const file of files.filter(file=>file.endsWith(".mjs"))){
   const imports=[...code.matchAll(/(?:from\s+|import\s*)["'](\.[^"']+)["']/g)].map(match=>match[1]);
   for(const name of imports)if(!existsSync(path.resolve(path.dirname(file),name)))missing.push(path.relative(root,file)+" -> "+name);
 }
-for(const file of ["index.html","battle.html","settings.html"]){
+for(const file of ["index.html","battle.html","hub.html","settings.html"]){
   const html=readFileSync(path.join(root,file),"utf8");
   for(const match of html.matchAll(/(?:src|href)=["'](\.\/[^"'?#]+)(?:[^"']*)["']/g)){
     if(!existsSync(path.resolve(root,match[1])))missing.push(file+" -> "+match[1]);

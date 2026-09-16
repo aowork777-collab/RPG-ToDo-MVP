@@ -6,6 +6,7 @@ import { canUseSkill, selectedEnemy, previewOrder } from "../battle/battle-engin
 import { isCampaignComplete } from "../storage/game-storage.mjs";
 
 import { renderEquipmentShop } from "./equipment-ui.mjs";
+import { getChapter, relicBonuses } from "../data/chapters.mjs";
 
 const text = (node,value) => { node.textContent = String(value); };
 const make = (tag,className,value = "") => { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; };
@@ -48,7 +49,7 @@ export class GameUI {
           <p class="stage-note" id="campNote">勝利すると次のステージが開きます。5ステージごとにボスが出現。</p>
         </section>
         <section class="battle-controls" id="battleControls" hidden>
-          <div class="battle-turn-row"><p class="game-kicker" id="battleTurn" role="status"></p><span class="keyboard-hint">技 1–4 / 必殺技 5</span></div>
+          <div class="battle-turn-row"><p class="game-kicker" id="battleTurn" role="status"></p><span class="keyboard-hint">技 1–7 / 必殺技 5</span></div>
           <div class="combat-information"><div class="target-grid" id="targetGrid" role="group" aria-label="攻撃対象"></div>
           <div id="enemyIntent" class="enemy-intent"></div>
           <section class="player-resources" aria-label="プレイヤーの状態">
@@ -70,6 +71,8 @@ export class GameUI {
         </section>
       </section>
       <details class="equipment-shop" open><summary>装備工房 <span>GOLDで冒険を強化</span></summary><div id="equipmentShop"></div></details>
+      <a class="hub-button" href="./hub.html#adventure">遠征地図・成長する技・遺物を見る →</a>
+      <p class="stage-note" id="relicStatus"></p>
       <details class="game-guide"><summary>戦闘の遊び方</summary><div>
         <p>通常攻撃でSPを1回復。戦闘スキル・回復スキルはSPを1消費します。SPは最大5です。</p>
         <p>攻撃や被弾でエネルギーがたまります。100で必殺技が使用可能。自分のターンに使用でき、使った後も通常の行動を選べます。</p>
@@ -98,8 +101,8 @@ export class GameUI {
       const button = make("button","game-skill-button" + (skill.id === "ultimate" ? " ultimate-button" : ""));
       button.type = "button";
       button.append(make("span","skill-number",String(index+1).padStart(2,"0") + " / " + skill.name),
-        make("strong","",skill.subtitle),make("small","skill-subtitle",skill.id === "ultimate" ? "全体攻撃 · 行動消費なし" : skill.type === "heal" ? "自分を回復" : skill.type === "guard" ? "次の自分の番まで有効" : skill.splash ? "対象 + 隣接" : "敵単体"),
-        make("span","skill-cost",skill.energyCost ? "ENERGY 100" : skill.spCost ? "SP −1" : "SP +1"),
+        make("strong","",skill.subtitle),make("small","skill-subtitle",skill.id === "ultimate" ? "全体攻撃 · 行動消費なし" : skill.all ? "全体攻撃" : skill.type === "heal" ? "自分を回復" : skill.type === "guard" ? "次の自分の番まで有効" : skill.splash ? "対象 + 隣接" : "敵単体"),
+        make("span","skill-cost",skill.energyCost ? "ENERGY 100" : skill.spCost ? "SP −" + skill.spCost : "SP +1"),
         make("span","skill-estimate",""));
       button.addEventListener("click",() => { this.lastSkill = skill.id; this.actions.useSkill(skill.id); });
       e.gameSkillGrid.append(button); this.skillButtons.set(skill.id,button);
@@ -120,6 +123,7 @@ export class GameUI {
   }
   renderStats(level,save) {
     this.save = save; const e = this.elements;
+    const relic = relicBonuses(save.clearedStage); text(e.relicStatus, `星の遺物 ${relic.relics} / 10 · 攻撃 +${relic.attack} / HP +${relic.hp} · 章を制覇して成長`);
     renderEquipmentShop(e.equipmentShop,save,this.actions,Boolean(this.battleActive));
     text(e.gamePlayerLevel,level); text(e.gameGold,save.gold.toLocaleString("ja-JP"));
     text(e.gameProgress,save.clearedStage + " / " + MAX_BATTLE_LEVEL); text(e.gameWins,save.wins);
@@ -139,6 +143,7 @@ export class GameUI {
     text(e.stageTitle,complete ? "遠征を制覇しました" : stage.title);
     text(e.campTitle,complete ? "全100ステージをクリア！" : "STAGE " + stage.level + (stage.isBoss ? " · ボス戦" : ""));
     text(e.campEnemies,stage.enemies.map(enemy => enemy.name).join(" / "));
+    const chapter = getChapter(stage.level); text(e.campNote, `第${chapter.id}章「${chapter.name}」 · ${chapter.story}`);
     text(e.campReward,complete ? "日々の達成が、この冒険の力になりました。" : "勝利報酬 +" + stage.goldReward + " GOLD · 次のボス STAGE " + stage.nextBoss);
     text(e.startBattleButton,loading ? "戦場を準備しています…" : complete ? "遠征クリア" : stage.isBoss ? "ボスに挑む" : "戦闘開始");
     e.startBattleButton.disabled = loading || complete;
@@ -211,6 +216,7 @@ export class GameUI {
         detail=range.min + "–" + range.max + " ダメージ" + (skill.all ? " / 全体" : skill.splash ? " / 隣接にも攻撃" : "");
       } else if(skill.type==="heal") detail=state.player.hp===state.player.maxHp ? "HPは満タンです" : "HP +" + Math.min(state.player.maxHp-state.player.hp,Math.floor(state.player.maxHp*skill.healRate));
       text(button.querySelector(".skill-estimate"),detail);
+      if (state.player.level < (skill.unlockLevel || 1)) text(button.querySelector(".skill-estimate"), `ToDo LEVEL ${skill.unlockLevel} で解放`);
     }
     e.gameSkillGrid.hidden=state.status!=="playing"; e.gameResult.hidden=!finished;
     e.gameBattleLog.replaceChildren();

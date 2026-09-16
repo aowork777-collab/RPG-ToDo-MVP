@@ -1,3 +1,4 @@
+import { renderTodayHabits, openSmallStep } from "./features/habits/today.mjs";
 import {
   addTask,
   removeTask,
@@ -87,6 +88,7 @@ function updateTodayLabel() {
 
 function render() {
   const questActions = {
+    smallStep: id => openSmallStep(state, id, () => { const result = persist(); if (result.ok) render(); return result.ok; }),
     editTask: id => taskEditor.open(id),
     toggleTask:
       handleToggleTask,
@@ -128,6 +130,7 @@ function render() {
     elements,
     state,
   );
+  renderTodayHabits(state, () => { const result = persist(); if (result.ok) render(); return result.ok; });
 }
 
 function handleToggleTask(
@@ -774,6 +777,7 @@ function bindEvents() {
               deleteTask:
                 handleDeleteTask,
               editTask: id => taskEditor.open(id),
+              smallStep: id => openSmallStep(state, id, () => { const result = persist(); if (result.ok) render(); return result.ok; }),
             },
           );
 

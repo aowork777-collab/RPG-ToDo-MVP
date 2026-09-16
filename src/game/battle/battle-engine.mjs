@@ -22,6 +22,7 @@ export function selectTarget(state, id) {
 export function canUseSkill(state, id) {
   const skill = getSkill(id);
   if (!skill || state.status !== "playing" || state.currentActorId !== "player") return false;
+  if (state.player.level < (skill.unlockLevel || 1)) return false;
   if (state.sp < skill.spCost || state.player.energy < (skill.energyCost || 0)) return false;
   return !(skill.type === "heal" && state.player.hp >= state.player.maxHp);
 }

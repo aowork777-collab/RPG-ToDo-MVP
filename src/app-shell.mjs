@@ -1,3 +1,4 @@
+import "./navigation.mjs";
 import { bindBackupControls } from "./features/backup/ui.mjs";
 bindBackupControls();
 const installButton=document.getElementById("installApp"),offlineButton=document.getElementById("prepareOffline"),updateButton=document.getElementById("checkUpdate"),status=document.getElementById("appStatus");

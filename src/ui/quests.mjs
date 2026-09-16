@@ -160,6 +160,11 @@ function createQuestItem(task, actions) {
     editButton.addEventListener("click",()=>actions.editTask(task.id));controls.append(editButton);
   }
   controls.append(deleteButton);
+  if (!task.completed && actions.smallStep) {
+    const small = document.createElement("button"); small.type = "button"; small.className = "action-button small-step-button"; small.textContent = "小さく始める";
+    small.setAttribute("aria-label", task.title + "を2分でできる一歩に変える"); small.addEventListener("click", () => actions.smallStep(task.id)); controls.append(small);
+  }
+  if (task.originalTitle) {const original = document.createElement("small"); original.className = "quest-note"; original.textContent = "小さな一歩 · 元の目標：" + task.originalTitle; content.append(original);}
 
   item.append(
     check,
