@@ -20,6 +20,7 @@ const APP_SHELL = [
   "./src/game/data/chapters.mjs",
   "./src/game/ui/adventure-map.mjs",
   "./styles/habits.css",
+  "./styles/clarity.css",
   "./manifest.webmanifest",
   "./src/actions.mjs",
   "./src/app-shell.mjs",

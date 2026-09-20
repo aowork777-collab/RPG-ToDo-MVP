@@ -9,6 +9,9 @@ export async function renderBoards(root, user) {
     query(cloud.from("board_members").select("*").eq("user_id", user.id)),
   ]);
   const header = panel("招待した人だけの共有ボード", "閲覧者は見るだけ、編集者はタスクの追加・完了・削除ができます。個人ToDoとXPは自動で共有されません。");
+  const steps = el("ol", "guide-steps");
+  for (const [title, description] of [["ボードを作る", "家事や勉強など、一緒に取り組む名前を付けます。"], ["相手を招待する", "相手の「アカウント・保管」にある招待先IDを受け取り、招待します。"], ["承認して共有スタート", "相手がこの画面で承認すると、タスクが見えるようになります。"]]) {const item = el("li"); item.append(el("strong", "", title), el("p", "", description)); steps.append(item);}
+  const guide = el("details", "usage-guide"); guide.append(el("summary", "", "共有するまでの3ステップ"), steps); header.append(guide);
   const form = el("form", "hub-form inline"); const create = submit("ボードを作成");
   form.append(field("ボード名", "title", "", {required: true, max: 80, placeholder: "例：家族の家事リスト"}), create);
   form.addEventListener("submit", event => {event.preventDefault(); run(create, async () => {
@@ -31,6 +34,7 @@ export async function renderBoards(root, user) {
   for (const board of available) {
     const owned = board.owner_id === user.id, member = memberships.find(member => member.board_id === board.id), editable = owned || member?.role === "editor";
     const card = panel(board.title, owned ? "あなたが管理者 · 招待した相手だけに共有" : editable ? "編集できます" : "閲覧のみ");
+    card.classList.add("shared-board"); card.prepend(el("p", "privacy-pill", "招待メンバー限定"));
     content.append(card);
     const tasks = await query(cloud.from("board_tasks").select("*").eq("board_id", board.id).order("created_at"));
     const list = el("div", "shared-task-list");

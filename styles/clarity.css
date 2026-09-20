@@ -1,0 +1,239 @@
+/* A quiet, readable workspace. Battle keeps its cinematic theme. */
+:is(.todo-page, .hub-page) {
+  color-scheme: light;
+  --text: #203447;
+  --muted: #526579;
+  --bg: #f5f7f9;
+  --surface: #ffffff;
+  --surface-soft: #f1f5f7;
+  --surface-raised: #edf4f3;
+  --line: #d9e2e7;
+  --line-strong: #9db1bc;
+  --gold: #146b61;
+  --gold-bright: #0c594f;
+  --gold-ink: #ffffff;
+  --green: #146b61;
+  --red: #ae3545;
+  --hub-bg: #f5f7f9;
+  --hub-panel: #ffffff;
+  --hub-border: #d9e2e7;
+  --hub-muted: #526579;
+  --hub-accent: #146b61;
+  --hub-lilac: #ece8f6;
+  background: #f5f7f9;
+  color: var(--text);
+  font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+:is(.todo-page, .hub-page) :is(button, input, select, textarea) { font-family: inherit; }
+:is(.todo-page, .hub-page) :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #2760ad;
+  outline-offset: 3px;
+}
+:is(.todo-page, .hub-page) button:disabled { cursor: not-allowed; }
+:is(.todo-page, .hub-page) .global-settings-link { color: #526579 !important; }
+.todo-page .app-shell, .hub-shell { max-width: 1240px; }
+.todo-page .topbar, .hub-header { padding-bottom: 18px; margin-bottom: 0; border-bottom: 0; }
+.hub-brand { color: #203447; }
+.todo-page .brand-mark, .hub-brand > span { background: #146b61; color: white; border-radius: 12px; }
+.todo-page .brand, .hub-brand { letter-spacing: .02em; }
+.todo-page .dashboard-grid { grid-template-columns: 270px minmax(0, 1fr); gap: 24px; }
+.todo-page .panel, .hub-panel {
+  background: #fff;
+  border: 1px solid #d9e2e7;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px #20344705;
+}
+.todo-page .quest-section { padding: 30px; }
+.todo-page h1, .hub-title h1 { color: #203447; letter-spacing: -.025em; }
+.todo-page .eyebrow, .hub-eyebrow { color: #146b61; letter-spacing: .06em; font-size: .78rem; }
+.hub-title { margin: 28px 0; }
+.todo-page .primary-button, .hub-button.primary {
+  background: #146b61; border-color: #146b61; color: #fff; box-shadow: none;
+}
+.todo-page .primary-button:hover, .hub-button.primary:hover:not(:disabled) { background: #0c594f; color: white; transform: none; }
+.todo-page .secondary-button, .hub-button {
+  background: #fff; color: #284454; border: 1px solid #bdccd4; min-height: 46px; border-radius: 10px; font-size: .9rem;
+}
+.todo-page .secondary-button:hover, .hub-button:hover:not(:disabled) { background: #edf4f3; color: #164e48; transform: none; }
+.hub-button.subtle { background: transparent; }
+.hub-button.danger, .todo-page .danger-button { color: #a0283c; border-color: #dcb6bd; background: #fff9fa; }
+.todo-page .avatar { background: #e6f3ee; border-color: #c0ded3; color: #146b61; }
+.todo-page .player-identity { margin: 18px 0; }
+.todo-page .player-name { overflow-wrap: anywhere; }
+.todo-page .level-number { color: #146b61; }
+.todo-page .xp-track { background: #e3eeeb; }
+.todo-page .xp-track span { background: #288a79; }
+.todo-page .battle-entry { background: linear-gradient(145deg, #edf5f3, #f4f3fa); }
+.todo-page .quick-add { background: #fff; border: 2px solid #a6c4bb; border-radius: 12px; }
+.todo-page .quick-add:focus-within { border-color: #146b61; box-shadow: 0 0 0 3px #146b6112; }
+.todo-page .quick-add input { color: #203447; min-height: 54px; }
+.todo-page .quick-add-button { background: #146b61; color: #fff; border-left: 0; min-width: 80px; }
+.todo-page .quick-add-button:hover { background: #0c594f; }
+.todo-page .quick-hint { margin-bottom: 24px; font-size: .8rem; line-height: 1.7; }
+.todo-page .filter-tabs { background: #edf2f4; border: 0; padding: 4px; }
+.todo-page .filter-tab { min-height: 44px; color: #526579; }
+.todo-page .filter-tab.active { background: white; color: #174f48; box-shadow: 0 1px 5px #17344812; }
+.todo-page .task-search input { background: white; border-color: #bdccd4; }
+.todo-page .quest-item { background: #fff; border-color: #d9e2e7; border-radius: 12px; padding: 18px; gap: 14px; }
+.todo-page .quest-item:hover { border-color: #93b9ac; }
+.todo-page .quest-item.completed { background: #f1f7f4; border-color: #d3e5dc; }
+.todo-page .completed .quest-title { color: #526c61; }
+.todo-page .quest-check { background: #fff; color: #7d9690; border: 2px solid #a5beb5; }
+.todo-page .quest-check:hover { background: #e4f2ec; color: #146b61; }
+.todo-page .quest-check.checked { background: #146b61; border-color: #146b61; color: white; }
+.todo-page .task-meta { color: #526579; font-size: .8rem; }
+.todo-page .task-meta .xp-reward { color: #146b61; font-weight: 700; }
+.todo-page .task-meta .difficulty { color: #806319; }
+.todo-page .task-meta .daily-badge { background: #e0f0ea; color: #165e50; }
+.todo-page .quest-note, .todo-page .editor-hint { color: #526579; }
+.todo-page .overdue-label, .todo-page .task-editor [data-error] { color: #a02c3e; }
+.todo-page .quest-actions { max-width: none; gap: 6px; align-items: center; }
+.todo-page .action-button { color: #425b6c; background: #f5f8fa; border-color: #d4dfe5; min-height: 44px; }
+.todo-page .delete-action { color: #a0283c; background: #fff9fa; }
+.todo-page .small-step-button { color: #146b61 !important; }
+.task-more { position: relative; }
+.task-more > summary { cursor: pointer; list-style: none; padding: 10px; border: 1px solid #d4dfe5; border-radius: 8px; min-height: 44px; color: #526579; font-size: .8rem; }
+.task-more > summary::-webkit-details-marker { display: none; }
+.task-more > summary::after { content: "⌄"; margin-left: 7px; }
+.task-more[open] > summary { background: #edf4f3; }
+.task-more-panel { position: absolute; z-index: 15; right: 0; top: calc(100% + 6px); width: 174px; padding: 8px; background: #fff; border: 1px solid #cbdadf; border-radius: 12px; box-shadow: 0 8px 24px #20344721; display: grid; gap: 6px; }
+.todo-page .empty-list { background: #f8fbfa; border-color: #bdcec7; border-radius: 14px; min-height: 160px; }
+.todo-page .daily-template-item { background: #f8fafb; }
+.todo-page .daily-template-item.disabled { background: #f0f3f5; }
+.todo-page .quest-dialog, .hub-dialog { background: #fff; color: #203447; border-color: #bdccd4; border-radius: 20px; }
+.todo-page .text-input, .hub-field :is(input, select, textarea), .todo-page .task-search input {
+  background: #fff; color: #203447; border-color: #aabdc7; font-size: 16px;
+}
+.todo-page input::placeholder, .hub-field input::placeholder, .hub-field textarea::placeholder { color: #617487; opacity: 1; }
+.todo-page input:is([type=date], [type=time]) { color-scheme: light; }
+.todo-page .icon-button { background: #f0f4f6; border-color: #d5e0e5; color: #42596a; }
+.todo-page .difficulty-options label > span { background: #f6f9f8; border-color: #cbd8d4; }
+.todo-page .difficulty-options b { color: #795d14; }
+.todo-page .difficulty-options small { color: #425b52; }
+.todo-page .difficulty-options input:checked + span { background: #e0f0e8; border-color: #146b61; box-shadow: inset 0 0 0 1px #146b61; }
+.todo-page .reward-preview { background: #e8f4ee; }
+.hub-field { font-size: .94rem; }
+.group-directory { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.muted { font-size: .92rem; }
+.hub-panel h2 { font-size: 1.25rem; }
+.hub-panel { padding: 28px; }
+.hub-stats > div { background: #fff; padding: 24px; }
+.hub-stats strong { color: #146b61; }
+.hub-tabs { padding: 6px; border: 1px solid #d9e2e7; border-radius: 14px; background: #edf2f4; }
+.hub-tabs .hub-button { flex: 1; margin: 0; border-color: transparent; background: transparent; }
+.hub-tabs [aria-pressed=true] { color: #146b61; background: #fff; border-color: #c4dad1; box-shadow: 0 1px 5px #20344709; }
+.hub-empty { background: #f7fafb; border-color: #becdd4; }
+.hub-notice { position: sticky; top: 12px; z-index: 25; background: #e3f2ea; border-color: #8fbfa9; color: #174f3d; box-shadow: 0 5px 20px #2034470a; }
+.hub-notice.error { background: #fff0f1; border-color: #d4a1ac; color: #8f2336; }
+.hub-details summary { padding: 10px 0; min-height: 44px; }
+.calendar-day { background: #fff; border-color: #d5e0e6; color: #203447; }
+.calendar-day small { color: #657689; }
+.calendar-day.completed { background: #e0f0e7; border-color: #99c4ae; color: #14583f; }
+.calendar-day.completed small { color: #17563f; }
+.calendar-day.rest { background: #eee9f7; border-color: #c5b9df; color: #64468a; }
+.calendar-day.rest small { color: #64468a; }
+.calendar-day.recorded { background: #e9f1fb; color: #345e8d; }
+.calendar-day[aria-pressed=true] { outline: 2px solid #146b61; }
+.calendar-legend { color: #526579; line-height: 1.8; }
+.badge-card { color: #596e80; border-color: #d8e1e7; background: #f5f8fa; }
+.badge-card.earned { color: #765718; background: #fcf6e8; border-color: #dfc997; }
+.hub-page .shared-task.done .shared-title { color: #526c61; }
+.privacy-pill { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 18px; padding: 6px 12px; color: #165a48; background: #e8f4ee; border-radius: 30px; font-size: .8rem; font-weight: 700; }
+.privacy-pill::before { content: "✓"; }
+.signin-card { padding: clamp(24px, 4vw, 44px); }
+.signin-card > h2 { font-size: clamp(1.45rem, 3vw, 2rem); }
+.feature-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin: 28px 0; }
+.feature-card { padding: 22px; border-radius: 14px; background: #f3f7f7; border: 1px solid #dde8e6; }
+.feature-card:nth-child(2) { background: #f5f2fa; border-color: #e6e0ef; }
+.feature-card:nth-child(3) { background: #faf6ee; border-color: #ece4d7; }
+.feature-number { color: #57756d; font-size: .8rem; letter-spacing: .1em; font-weight: 700; }
+.feature-card h3 { font-size: 1.05rem; margin: 12px 0 8px; }
+.feature-card p { margin: 0; }
+.google-login { min-width: 240px; min-height: 52px; font-size: 1rem; }
+.text-link { display: inline-block; padding: 8px 0; color: #146b61; text-underline-offset: 4px; }
+.login-help li { margin: 10px 0; color: #526579; font-size: .9rem; }
+.usage-guide { padding: 16px 22px; margin: 0 0 22px; background: #eef5f3; border: 1px solid #d4e4dc; border-radius: 14px; color: #34564c; }
+.usage-guide summary { cursor: pointer; font-size: .94rem; font-weight: 700; min-height: 28px; }
+.usage-guide summary > span { font-weight: 400; margin-left: 12px; font-size: .85rem; }
+.usage-guide > p { margin: 12px 0 0; font-size: .88rem; }
+.usage-guide a { color: #146b61; text-decoration: underline; text-underline-offset: 4px; }
+.guide-steps { counter-reset: step; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; padding: 0; margin: 22px 0; list-style: none; }
+.guide-steps li { counter-increment: step; }
+.guide-steps li::before { content: counter(step); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #d5e9df; color: #205e49; font-size: .8rem; font-weight: 700; margin-bottom: 8px; }
+.guide-steps p { font-size: .84rem; color: #526579; margin: 8px 0 0; }
+.week-dots > span { color: #536579; background: #f3f7f8; border-color: #d3e0e4; }
+.week-dots .completed { background: #146b61; color: #fff; border-color: #146b61; }
+.week-dots .rest { background: #e8e1f4; color: #624883; }
+.todo-page .settings-intro > p:last-child, .todo-page .settings-note { color: #526579; }
+.todo-page .settings-status { color: #17654e; }
+.todo-page footer, .hub-footer { color: #627486; }
+.hub-page .chapter-card { background: #fff; color: #203447; border-color: #d9e2e7; border-top: 5px solid var(--chapter-color); }
+.hub-page .chapter-card.current { background: #edf7f1; border-color: #83bda5; }
+.hub-page .chapter-card.locked { filter: none; opacity: 1; background: #f2f4f6; }
+.hub-page .chapter-card p { color: #526579; }
+.hub-page .chapter-card .chapter-status { color: #146b61; }
+.hub-page .chapter-card strong { color: #735b23; }
+.hub-page .chapter-stages span { background: #d6e0df; }
+.hub-page .chapter-stages span.cleared { background: #278270; }
+.hub-page .chapter-stages span.boss { box-shadow: 0 0 0 1px #9d761c; }
+.hub-page .mastery-list article { background: #fff; border-color: #d5e0e5; }
+.hub-page .mastery-list p { color: #526579; }
+.hub-page .mastery-list small { color: #17654e; }
+.hub-page .mastery-list .unlocked { background: #f0f8f3; border-color: #99c5ae; }
+:is(.todo-page, .hub-page) .main-navigation { background: #fff; border: 1px solid #d9e2e7; margin: 12px 0 24px; padding: 7px; }
+:is(.todo-page, .hub-page) .main-navigation a { color: #526579; min-height: 58px; }
+:is(.todo-page, .hub-page) .main-navigation a:hover { background: #f1f6f4; color: #174f48; }
+:is(.todo-page, .hub-page) .main-navigation a[aria-current=page] { color: #145d4f; background: #e6f2ec; box-shadow: none; }
+.main-navigation .nav-copy { display: grid; gap: 2px; font-size: .9rem; line-height: 1.5; }
+.main-navigation .nav-copy small { font-size: .68rem; font-weight: 400; }
+.main-navigation .nav-icon { display: grid; place-items: center; flex-shrink: 0; width: 24px; font-size: 1.25rem; }
+
+@media (max-width: 1000px) {
+  .todo-page .dashboard-grid { grid-template-columns: 230px minmax(0,1fr); gap: 20px; }
+  .todo-page .quest-section { padding: 22px; }
+  .todo-page .quest-item { grid-template-columns: 46px minmax(0,1fr); }
+  .todo-page .quest-actions { grid-column: 2; justify-content: flex-start; }
+}
+@media (max-width: 720px) {
+  :is(.todo-page, .hub-page) { scroll-padding-bottom: 100px; }
+  .todo-page .app-shell, .hub-shell { width: 100%; padding: 16px 16px calc(110px + env(safe-area-inset-bottom)); }
+  .todo-page .topbar > .primary-button { width: auto; margin: 0; }
+  .todo-page .topbar { justify-content: space-between; }
+  .todo-page .topbar .global-settings-link { margin-left: auto; }
+  .todo-page .dashboard-grid { display: flex; }
+  .todo-page .quest-section { padding: 20px 16px; }
+  .todo-page .quest-item { padding: 14px 12px; gap: 10px; }
+  .todo-page .side-column { grid-template-columns: 1fr; }
+  .todo-page .player-identity .avatar { display: grid; }
+  .feature-grid, .guide-steps { grid-template-columns: 1fr; gap: 12px; }
+  .feature-card { padding: 18px; }
+  .guide-steps li { position: relative; padding-left: 40px; }
+  .guide-steps li::before { position: absolute; left: 0; top: 0; }
+  .usage-guide { padding: 16px; }
+  .usage-guide summary > span { display: block; margin: 3px 0 0 18px; }
+  .hub-panel { padding: 22px 18px; }
+  .hub-tabs { gap: 4px; }
+  .hub-tabs .hub-button { font-size: .78rem; padding: 10px 6px; }
+  .google-login { width: 100%; min-width: 0; }
+  .hub-stats > div { padding: 16px 10px; }
+  .hub-stats .muted { font-size: .75rem; }
+  .hub-field :is(input, select, textarea) { font-size: 16px; }
+  :is(.todo-page, .hub-page) .main-navigation { position: fixed; top: auto; bottom: 0; left: 0; right: 0; z-index: 40; border-radius: 16px 16px 0 0; margin: 0; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #fffffffa; box-shadow: 0 -4px 24px #2034470d; }
+  :is(.todo-page, .hub-page) .main-navigation a { min-height: 56px; padding: 4px; gap: 2px; flex-direction: column; }
+  :is(.todo-page, .hub-page) .main-navigation .nav-copy { font-size: .75rem; }
+  :is(.todo-page, .hub-page) .main-navigation .nav-copy small { display: none; }
+  :is(.todo-page, .hub-page) .main-navigation .nav-icon { font-size: 1.15rem; }
+  .hub-header { gap: 10px; }
+  .hub-header .global-settings-link { font-size: .75rem; }
+}
+@media (max-width: 400px) {
+  .todo-page .topbar .brand strong { font-size: .85rem; }
+  .todo-page .topbar .global-settings-link { font-size: .73rem; }
+  .todo-page .topbar > .primary-button { width: 100%; }
+  .todo-page .section-heading { flex-wrap: wrap; }
+  .hub-stats { gap: 5px; }
+  .hub-stats .muted { font-size: .68rem; }
+}
+@media (prefers-reduced-motion: reduce) { :is(.todo-page, .hub-page) * { scroll-behavior: auto !important; transition: none !important; } }

@@ -9,7 +9,7 @@ export function renderTodayHabits(state, commit) {
   let root = document.getElementById("todayHabitSummary");
   if (!root) {root = el("section", "panel today-habits"); root.id = "todayHabitSummary"; document.querySelector(".profile-card")?.after(root);}
   const week = weekSummary(state.habits), today = dateKey(), summary = daySummary(state.habits, today);
-  root.replaceChildren(el("p", "hub-eyebrow", "MY PACE"), el("h2", "", `今週 ${week.activeDays} / ${week.goal} 日`));
+  root.replaceChildren(el("p", "hub-eyebrow", "あなたの週間目標"), el("h2", "", `今週 ${week.activeDays} / ${week.goal} 日達成`));
   const dots = el("div", "week-dots");
   for (let i = 0; i < 7; i++) {const date = new Date(`${week.start}T12:00:00`); date.setDate(date.getDate() + i); const key = dateKey(date), item = daySummary(state.habits, key); const dot = el("span", item.status, ["月", "火", "水", "木", "金", "土", "日"][i]); dot.title = `${key} ${item.count}件達成${item.rest ? " / 休む日" : ""}`; dots.append(dot);}
   root.append(dots, el("p", "muted", week.activeDays >= week.goal ? "今週の目標達成！ あなたのペースで続けよう。" : "1つできた日を数えます。連続でなくて大丈夫。"));

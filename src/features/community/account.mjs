@@ -1,14 +1,26 @@
 import { cloud, query, requireRows } from "./client.mjs";
-import { el, button, field, panel, submit, notice, run } from "../habits/dom.mjs";
+import { el, button, link, field, panel, notice, run } from "../habits/dom.mjs";
 import { createBackup, restoreBackup, parseBackup } from "../backup/backup.mjs";
 import { googleSignInOptions } from "./auth.mjs";
 
 export function renderSignIn(root, refresh, authClient = cloud.auth) {
-  const card = panel("仲間とつながるアカウント", "記録・ToDo・冒険はログインなしで使えます。共有ボードとタグ仲間はログインして利用します。");
+  const card = panel("一緒に続ける、最初の一歩", "家族とやることを分け合ったり、同じ目標の仲間を応援したり。ログインすると仲間の機能が使えます。");
+  card.classList.add("signin-card");
+  card.prepend(el("p", "privacy-pill", "個人のタスクは自動公開されません"));
+  const benefits = el("div", "feature-grid");
+  for (const [mark, heading, description] of [["01", "招待した人と共有", "ボードを作り、相手を招待。見るだけ・編集できる、の権限を選べます。"], ["02", "同じ目標を応援", "興味のあるタグのサークルで、今日できたことを報告できます。"], ["03", "記録をクラウドに保管", "自分専用のバックアップを手動で保存・復元できます。"]]) {
+    const item = el("article", "feature-card"); item.append(el("span", "feature-number", mark), el("h3", "", heading), el("p", "muted", description)); benefits.append(item);
+  }
+  card.append(benefits);
   const login = button("Googleでログイン", () => run(login, async () => {
+    notice("Googleのログイン画面へ移動します…");
     await query(authClient.signInWithOAuth(googleSignInOptions(location.href)));
-  }), "hub-button primary");
-  card.append(login, el("p", "muted", "初めての方も同じボタンから登録できます。Googleの画面で認証します。このアプリでGoogleのパスワードを入力する必要はありません。"), el("p", "muted", "個人のタスクや記録が自動で公開されることはありません。共有するときは内容と相手を自分で選びます。")); root.append(card);
+  }), "hub-button primary google-login");
+  card.append(login, el("p", "muted", "初めての方もこのボタンから。Googleの画面で認証し、このアプリへ戻ります。"), link("ログインせず、個人のタスクを使う →", "./index.html", "text-link"));
+  const help = el("details", "hub-details login-help"); help.append(el("summary", "", "ログインできないとき"));
+  const tips = el("ul");
+  for (const text of ["SNSなどのアプリ内で開いている場合は、SafariやChromeで開き直してください。", "キャンセルした場合は、この画面からもう一度ログインしてください。", "「401: invalid_client」が出る場合は、アプリの認証設定の問題です。運営にエラー名をお知らせください。あなたのToDoデータを削除する必要はありません。"]) tips.append(el("li", "", text));
+  help.append(tips); card.append(help); root.append(card);
 }
 
 export async function renderAccount(root, user, state, refresh, signedOut = refresh) {

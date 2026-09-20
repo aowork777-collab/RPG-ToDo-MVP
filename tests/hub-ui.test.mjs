@@ -9,6 +9,8 @@ import { openSmallStep } from "../src/features/habits/today.mjs";
 import { button } from "../src/features/habits/dom.mjs";
 import { googleSignInOptions, readAuthReturn, cleanAuthReturn } from "../src/features/community/auth.mjs";
 import { renderSignIn } from "../src/features/community/account.mjs";
+import { renderQuestList } from "../src/ui/quests.mjs";
+import { toggleTaskState } from "../src/actions.mjs";
 
 const url = "https://aowork777-collab.github.io/RPG-ToDo-MVP/hub.html";
 function setup(t, href = url) {
@@ -49,6 +51,42 @@ test("Google button invokes only OAuth; network failure restores retry and shows
   login.click(); assert.equal(login.disabled, true); await settle();
   assert.deepEqual(received, googleSignInOptions(url)); assert.equal(login.disabled, false);
   assert.match(document.getElementById("hubNotice").textContent, /テスト接続エラー/);
+});
+test("OAuth invalid_client return explains configuration failure without exposing provider details", t => {
+  setup(t);
+  for (const suffix of ["?error_code=invalid_client", "#error=invalid_client&error_description=PRIVATE_DETAIL"]) {
+    const result = readAuthReturn(url + suffix);
+    assert.equal(result.returned, true);
+    assert.match(result.message, /設定に問題/);
+    assert.match(result.message, /ログインせず/);
+    assert.doesNotMatch(result.message, /PRIVATE_DETAIL/);
+  }
+});
+test("Task menu keeps edit, small-step and deletion wired to the selected task", t => {
+  const {root} = setup(t), state = createDefaultState();
+  const task = addTask(state, {title: "散歩する", difficulty: 2}), calls = [];
+  renderQuestList({questList: root}, state, {
+    editTask: id => calls.push(["edit", id]), smallStep: id => calls.push(["small", id]),
+    deleteTask: id => calls.push(["delete", id]), toggleTask() {},
+  });
+  const menu = root.querySelector("details"); assert.equal(menu.open, false);
+  root.querySelector('[data-action="edit"]').click();
+  menu.open = true; root.querySelector('[data-action="small"]').click(); assert.equal(menu.open, false);
+  menu.open = true; root.querySelector('[data-action="delete"]').click();
+  assert.deepEqual(calls, [["edit", task.id], ["small", task.id], ["delete", task.id]]);
+});
+test("Completing a task preserves XP rules and moves keyboard focus to the next task", t => {
+  const {root} = setup(t), state = createDefaultState();
+  const first = addTask(state, {title: "読む", difficulty: 2});
+  const second = addTask(state, {title: "歩く", difficulty: 1});
+  const elements = {questList: root}, actions = {deleteTask() {}, toggleTask(id) {toggleTaskState(state, id); renderQuestList(elements, state, actions);}};
+  renderQuestList(elements, state, actions);
+  const complete = root.querySelector('[data-action="complete"]'); complete.focus(); complete.click();
+  assert.equal(first.completed, true); assert.equal(state.totalXp, first.reward);
+  assert.equal(document.activeElement.closest("article").dataset.taskId, second.id);
+  state.filter = "completed"; renderQuestList(elements, state, actions);
+  root.querySelector('[data-action="complete"]').click();
+  assert.equal(first.completed, false); assert.equal(state.totalXp, 0);
 });
 test("Calendar saves rest, mood and private note without granting XP", t => {
   const {root} = setup(t); const state = createDefaultState(); let commits = 0;

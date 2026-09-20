@@ -18,3 +18,7 @@
 @media(max-width:800px){.hub-columns{grid-template-columns:1fr}.hub-shell{padding:16px}.hub-panel{padding:20px}.hub-stats{gap:8px}.hub-stats>div{padding:16px 12px}.main-navigation{gap:3px;margin:14px 0 20px}.main-navigation a{gap:6px;font-size:.8rem;padding:10px 4px}.today-habits .week-dots>span{aspect-ratio:auto;min-height:30px}.hub-title{margin:26px 0 22px}}
 @media(max-width:480px){.hub-stats strong{font-size:1.1rem}.hub-stats .muted{font-size:.68rem}.hub-title h1{font-size:1.55rem}.hub-panel{padding:17px}.hub-field{font-size:.82rem}.calendar-grid{gap:4px}.calendar-day{min-height:52px}.hub-button{font-size:.78rem}.hub-footer{flex-direction:column}.main-navigation{position:sticky;top:8px;z-index:20;background:#121d2af5;backdrop-filter:blur(10px)}.main-navigation a{flex-direction:column;gap:2px;font-size:.7rem;padding:7px 2px}.main-navigation a span{font-size:1rem}.shared-title{min-width:180px}.hub-form.inline{display:grid}.hub-header .global-settings-link{font-size:.7rem}}
 @media(prefers-reduced-motion:reduce){.hub-button,.main-navigation a{transition:none}.hub-button:hover:not(:disabled){transform:none}}
+.main-navigation .nav-copy { display: grid; gap: 3px; font-size: inherit; }
+.main-navigation .nav-copy strong { font-size: .88rem; }
+.main-navigation .nav-copy small { font-size: .65rem; font-weight: 400; }
+@media (max-width: 720px) { .main-navigation .nav-copy small { display: none; } }

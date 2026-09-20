@@ -1,4 +1,5 @@
 import { createClient } from "../../vendor/supabase.mjs";
+import { authErrorMessage } from "./auth.mjs";
 
 // Publishable key: access is enforced by database RLS, never by this key's secrecy.
 export const cloud = createClient("https://rxvdnikizkyfavczoyym.supabase.co", "sb_publishable_FOkzOdXd_9pAl1Xc4Wz5xA_ayVM1Pwc", {
@@ -8,6 +9,7 @@ export const cloud = createClient("https://rxvdnikizkyfavczoyym.supabase.co", "s
 export async function query(request) {
   const {data, error} = await request;
   if (error) {
+    if (/invalid_client|deleted_client/i.test(`${error.code || ""} ${error.message || ""}`)) throw Error(authErrorMessage("invalid_client"));
     if (error.code === "23505") throw Error("すでに登録されています。招待・参加・今日の報告は1回ずつです。");
     if (error.code === "42501" || error.code === "23503") throw Error("権限がないか、指定した相手・データが見つかりません。更新して確認してください。");
     if (error.message?.includes("Invalid login")) throw Error("メールアドレスまたはパスワードを確認してください。");

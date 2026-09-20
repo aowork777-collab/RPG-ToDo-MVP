@@ -20,16 +20,16 @@ function matchesFilter(task, filter) {
 function createEmptyState(filter) {
   const copy = {
     active: [
-      "未完了のクエストはありません",
-      "新しいクエストを追加して冒険を始めましょう。",
+      "未完了のタスクはありません",
+      "今日やりたいことを、上の入力欄から1つ追加してみましょう。",
     ],
     completed: [
-      "完了したクエストはありません",
-      "クエストを終えると、ここに記録されます。",
+      "完了したタスクはまだありません",
+      "タスクの左の ✓ を押すと、ここに達成したことが並びます。",
     ],
     all: [
-      "クエストログは空です",
-      "最初のクエストを追加しましょう。",
+      "最初のタスクを追加しましょう",
+      "「水を1杯飲む」「本を1ページ読む」。小さなことで大丈夫です。",
     ],
   }[filter];
 
@@ -60,6 +60,7 @@ function createQuestItem(task, actions) {
 
   const check = document.createElement("button");
   check.type = "button";
+  check.dataset.action = "complete";
 
   check.className =
     `quest-check${task.completed ? " checked" : ""}`;
@@ -134,11 +135,17 @@ function createQuestItem(task, actions) {
   }
   const controls = document.createElement("div");
   controls.className = "quest-actions";
+  const more = document.createElement("details"); more.className = "task-more";
+  const moreLabel = document.createElement("summary"); moreLabel.textContent = "その他";
+  moreLabel.setAttribute("aria-label", `${task.title}のその他の操作`);
+  const morePanel = document.createElement("div"); morePanel.className = "task-more-panel";
+  more.append(moreLabel, morePanel);
 
   const deleteButton =
     document.createElement("button");
 
   deleteButton.type = "button";
+  deleteButton.dataset.action = "delete";
   deleteButton.className =
     "action-button delete-action";
 
@@ -157,13 +164,15 @@ function createQuestItem(task, actions) {
   if (actions.editTask) {
     const editButton=document.createElement("button");editButton.type="button";editButton.className="action-button";
     editButton.textContent="編集";editButton.setAttribute("aria-label",task.title+"を編集");
+    editButton.dataset.action="edit";
     editButton.addEventListener("click",()=>actions.editTask(task.id));controls.append(editButton);
   }
-  controls.append(deleteButton);
   if (!task.completed && actions.smallStep) {
     const small = document.createElement("button"); small.type = "button"; small.className = "action-button small-step-button"; small.textContent = "小さく始める";
-    small.setAttribute("aria-label", task.title + "を2分でできる一歩に変える"); small.addEventListener("click", () => actions.smallStep(task.id)); controls.append(small);
+    small.dataset.action = "small";
+    small.setAttribute("aria-label", task.title + "を2分でできる一歩に変える"); small.addEventListener("click", () => { more.open = false; actions.smallStep(task.id); }); morePanel.append(small);
   }
+  morePanel.append(deleteButton); controls.append(more);
   if (task.originalTitle) {const original = document.createElement("small"); original.className = "quest-note"; original.textContent = "小さな一歩 · 元の目標：" + task.originalTitle; content.append(original);}
 
   item.append(
@@ -183,7 +192,7 @@ export function renderQuestList(
   const query = (elements.questSearch?.value || "").trim().toLocaleLowerCase("ja-JP");
   const focused = document.activeElement;
   const focusedTaskId = focused?.closest?.(".quest-item")?.dataset.taskId;
-  const focusedClass = focused?.classList?.contains("quest-check") ? ".quest-check" : ".delete-action";
+  const focusedAction = focused?.dataset?.action || "complete";
   const visibleTasks = state.tasks
     .filter(task => !query || task.title.toLocaleLowerCase("ja-JP").includes(query))
     .filter((task) =>
@@ -231,8 +240,10 @@ export function renderQuestList(
   elements.questList.append(fragment);
   if (focusedTaskId) {
     const rows = Array.from(elements.questList.children);
-    const row = rows.find(node => node.dataset.taskId === focusedTaskId) || rows[0];
-    row?.querySelector(focusedClass)?.focus({ preventScroll: true });
+    const sameRow = rows.find(node => node.dataset.taskId === focusedTaskId);
+    const target = sameRow?.querySelector(`[data-action="${["complete", "edit", "delete", "small"].includes(focusedAction) ? focusedAction : "complete"}"]`) || rows[0]?.querySelector(".quest-check");
+    if (target?.closest("details")) target.closest("details").open = true;
+    target?.focus({ preventScroll: true });
   }
 }
 

@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#101723" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7f9" />
   <meta name="description" content="タスクを達成して経験値を獲得。毎日の予定と繰り返しタスクを整理するRPG ToDo。" />
   <title>今日のタスク / RPG ToDo</title>
   <link rel="stylesheet" href="./styles/tokens.css" />
@@ -13,6 +13,7 @@
   <script type="module" src="./src/app.mjs?v=20260914"></script>
   <link rel="stylesheet" href="./styles/app.css" />
   <link rel="stylesheet" href="./styles/habits.css" />
+  <link rel="stylesheet" href="./styles/clarity.css" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./assets/app/icon-192.png" />
   <script type="module" src="./src/app-shell.mjs"></script>
@@ -26,28 +27,33 @@
       <a class="global-settings-link" href="./settings.html">設定・バックアップ</a><p class="today" id="todayLabel"></p>
       <button class="primary-button" id="openQuestButton" type="button"><span aria-hidden="true">＋</span> タスクを追加</button>
     </header>
+    <details class="usage-guide">
+      <summary>はじめての方へ <span>3つのステップで使えます</span></summary>
+      <ol class="guide-steps"><li><strong>やることを1つ追加</strong><p>「本を1ページ読む」など、小さな予定から。</p></li><li><strong>できたら左の ✓ を押す</strong><p>経験値（XP）がたまり、レベルが上がります。</p></li><li><strong>記録を見て、冒険へ</strong><p>達成はカレンダーに。育ったレベルで戦えます。</p></li></ol>
+      <p>一人で使うならログイン不要。誰かと共有するときは <a href="./hub.html#community">「仲間」からログイン</a>できます。</p>
+    </details>
     <main id="top" class="dashboard-grid">
       <aside class="side-column" aria-label="プレイヤー情報">
         <section class="profile-card panel">
-          <p class="eyebrow">YOUR PROGRESS</p>
+          <p class="eyebrow">あなたの成長</p>
           <div class="player-identity"><span class="avatar" aria-hidden="true">R</span><div><p class="player-name">YOU</p><p class="player-title">今日の達成が、次のレベルへ。</p></div></div>
-          <div class="level-row"><div><span class="level-label">LEVEL</span><strong class="level-number" id="levelNumber">1</strong></div><div class="xp-copy"><strong id="xpCurrent">0</strong><span> / 100 XP</span></div></div>
+          <div class="level-row"><div><span class="level-label">レベル</span><strong class="level-number" id="levelNumber">1</strong></div><div class="xp-copy"><strong id="xpCurrent">0</strong><span> / 100 XP</span></div></div>
           <div class="xp-track" id="xpTrack" role="progressbar" aria-label="次のレベルまでの経験値" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="xpBar"></span></div>
-          <p class="next-level-copy" id="nextLevelCopy">あと 100 XP で LEVEL 2</p>
+          <p class="next-level-copy" id="nextLevelCopy">あと 100 XP でレベル 2</p>
           <div class="mini-stats"><div><span>未完了</span><strong id="activeQuestCount">0</strong></div><div><span>完了</span><strong id="completedQuestCount">0</strong></div></div>
         </section>
-        <section class="battle-entry panel"><p class="eyebrow">ASTRAL EXPEDITION</p><h2>育てたレベルで冒険へ</h2><p>タスクで獲得したXPが、バトルの強さになります。</p><a href="./battle.html" class="secondary-button">バトル画面へ <span aria-hidden="true">↗</span></a></section>
+        <section class="battle-entry panel"><p class="eyebrow">達成が、冒険の力になる</p><h2>育てたレベルで冒険へ</h2><p>タスクで獲得した経験値が、あなたの強さになります。</p><a href="./hub.html#adventure" class="secondary-button">冒険マップを見る <span aria-hidden="true">→</span></a></section>
         <details class="settings-panel"><summary>データの設定</summary><p>このブラウザに自動保存されます。</p><button id="resetButton" class="danger-button" type="button">ToDoデータをリセット</button></details>
       </aside>
       <div class="main-column">
         <section class="quest-section panel" aria-labelledby="questSectionTitle">
-          <div class="section-heading"><div><p class="eyebrow">QUEST LOG</p><h1 id="questSectionTitle" tabindex="-1">今日のタスク</h1><p class="section-description">ひとつずつ、できたことを増やそう。</p></div><span id="listSummary" class="list-summary"></span></div>
+          <div class="section-heading"><div><p class="eyebrow">小さな一歩から、はじめよう</p><h1 id="questSectionTitle" tabindex="-1">今日のタスク</h1><p class="section-description">できたら左の ✓ を押して完了。ひとつずつで大丈夫。</p></div><span id="listSummary" class="list-summary"></span></div>
           <form id="quickTaskForm" class="quick-add" aria-label="タスクをすぐ追加">
             <label class="sr-only" for="quickTaskTitle">追加するタスク名</label>
             <input id="quickTaskTitle" name="title" type="text" maxlength="60" required autocomplete="off" placeholder="やることを入力して Enter で追加" />
             <button class="quick-add-button" type="submit">追加 <span aria-hidden="true">＋</span></button>
           </form>
-          <p class="quick-hint">すぐ追加は難易度 ★★。期限・繰り返しは上の「タスクを追加」から。</p>
+          <p class="quick-hint">ここから追加すると、完了時に20 XP。期限や繰り返しは「タスクを追加」で設定できます。</p>
           <div class="list-toolbar">
             <div class="filter-tabs" role="group" aria-label="タスクの表示切り替え">
               <button type="button" class="filter-tab active" data-filter="active" aria-pressed="true">未完了</button>
@@ -64,11 +70,11 @@
         </details>
       </div>
     </main>
-    <footer><span>RPG TODO</span><span>このブラウザに自動保存 · APP LOCAL 2026.09.14</span></footer>
+    <footer><span>RPG TODO · 自分のペースで、一歩ずつ。</span><span>個人の記録はこのブラウザに自動保存</span></footer>
   </div>
   <dialog class="quest-dialog" id="questDialog" aria-labelledby="dialogTitle">
     <form method="dialog" id="questForm">
-      <div class="dialog-header"><div><p class="eyebrow">NEW QUEST</p><h2 id="dialogTitle">タスクを追加</h2></div><button class="icon-button" type="button" id="closeDialogButton" aria-label="閉じる">×</button></div>
+      <div class="dialog-header"><div><p class="eyebrow">今日やることを決める</p><h2 id="dialogTitle">タスクを追加</h2></div><button class="icon-button" type="button" id="closeDialogButton" aria-label="閉じる">×</button></div>
       <label class="field-label" for="questTitle">タスク名</label>
       <input class="text-input" id="questTitle" name="title" type="text" maxlength="60" autocomplete="off" placeholder="例：部屋を掃除する" required />
       <fieldset><legend class="field-label">難易度</legend><div class="difficulty-options">

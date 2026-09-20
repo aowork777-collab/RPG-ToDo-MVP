@@ -34,10 +34,10 @@ test("Hub saves profile, blocks stale writes, and clears private views on logout
   location.hash = "community";
   await waitFor(() => root.textContent.includes("招待した人だけの共有ボード"));
   location.hash = "profile";
-  await waitFor(() => root.textContent.includes("あなたのプロフィール"));
+  await waitFor(() => root.querySelector("#hubTitle")?.textContent === "プロフィール");
   user = null; notify("SIGNED_OUT", null);
   await new Promise(resolve => setTimeout(resolve, 20));
-  assert.match(root.textContent, /あなたのプロフィール/);
+  assert.equal(root.querySelector("#hubTitle").textContent, "プロフィール");
   location.hash = "community";
   await waitFor(() => root.textContent.includes("Googleでログイン"));
   user = {id: "test-user", email: "test@example.invalid"}; notify("SIGNED_IN", {user});

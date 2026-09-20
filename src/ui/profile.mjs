@@ -8,7 +8,7 @@ export function renderProfile(elements, state) {
 
   setText(elements.levelNumber, progress.level);
   setText(elements.xpCurrent, progress.currentXp);
-  setText(elements.nextLevelCopy, `あと ${progress.remainingXp} XP で LEVEL ${progress.nextLevel}`);
+  setText(elements.nextLevelCopy, `あと ${progress.remainingXp} XP でレベル ${progress.nextLevel}`);
   setText(elements.activeQuestCount, active);
   setText(elements.completedQuestCount, completed);
   elements.xpBar.style.width = `${progress.percent}%`;

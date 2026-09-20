@@ -16,6 +16,7 @@ function finishAuthReturn() {
   window.dispatchEvent(new Event("rpg:navigation"));
 }
 function title(text, description, eyebrow) {
+  document.title = `${text} / RPG ToDo`;
   const header = el("header", "hub-title"); const h1 = el("h1", "", text); h1.id = "hubTitle"; h1.tabIndex = -1;
   header.append(el("p", "hub-eyebrow", eyebrow), h1, el("p", "muted", description)); return header;
 }
@@ -29,8 +30,8 @@ async function render() {
   const page = authReturn ? "community" : location.hash.slice(1) || "records";
   root.replaceChildren(); document.getElementById("hubNotice").hidden = true;
   if (page === "profile") {
-    root.append(title("あなたのプロフィール", "なりたい自分を、毎日の小さな一歩から。", "MY JOURNEY"));
-    const summary = panel(`${state.habits.profile.avatar} ${state.habits.profile.name}`, `PLAYER LEVEL ${getProgress(state.totalXp).level} · ${state.totalXp} XP`);
+    root.append(title("プロフィール", "表示名・目標・興味のあるタグを設定できます。", "自分のペースで続けよう"));
+    const summary = panel(`${state.habits.profile.avatar} ${state.habits.profile.name}`, `プレイヤーレベル ${getProgress(state.totalXp).level} · ${state.totalXp} XP`);
     const form = el("form", "hub-form"), p = state.habits.profile;
     form.append(field("表示名", "name", p.name, {required: true, max: 30, autocomplete: "nickname"}), selectField("アバター", "avatar", AVATARS.map(avatar => [avatar, avatar]), p.avatar), field("目指していること", "goal", p.goal, {max: 140, placeholder: "例：3か月後に英語で自己紹介できるようになる"}), field("興味のあるタグ（5個まで・カンマ区切り）", "tags", p.tags.join(", "), {max: 104, placeholder: "英語, 勉強, 読書"}), selectField("1つ以上達成する日を、週に何日つくる？", "weeklyGoal", Array.from({length: 7}, (_, i) => [i + 1, `週 ${i + 1} 日`]), state.habits.weeklyGoal), submit("プロフィールを保存"));
     form.addEventListener("submit", event => {event.preventDefault(); const data = new FormData(form); const name = String(data.get("name")).trim(); if (!name) return;
@@ -40,9 +41,9 @@ async function render() {
       else {state.habits.profile = previousProfile; state.habits.weeklyGoal = previousGoal;}
     }); summary.append(form); root.append(summary, link("仲間への公開・クラウド保管を設定 →", "./hub.html#community"));
   } else if (page === "adventure") {
-    root.append(title("星の遠征地図", "今日の達成で強くなる。次の物語は、あなたの一歩の先に。", "ASTRAL EXPEDITION")); renderAdventure(root, getProgress(state.totalXp).level);
+    root.append(title("冒険マップ", "タスクで上げたレベルが、戦う力になります。次のステージに挑戦しましょう。", "今日の一歩が、冒険の力に")); renderAdventure(root, getProgress(state.totalXp).level);
   } else if (page === "community") {
-    root.append(title("ひとりの一歩を、仲間と", "招待した相手との共有と、同じタグの仲間との応援。", "TOGETHER"));
+    root.append(title("仲間と続ける", "招待した相手とタスクを共有したり、同じ目標の仲間を応援したりできます。", "共有・応援・クラウド保管"));
     const content = el("div", "hub-stack"); content.append(el("p", "muted", "アカウントを確認しています…")); root.append(content);
     try {
       if (!navigator.onLine) throw Error("現在オフラインです。ToDo・記録・冒険はこのまま使えます。仲間の機能は接続後に開いてください。");
@@ -75,7 +76,7 @@ async function render() {
       await show("boards");
     } catch (error) { if (runId === request) { finishAuthReturn(); content.replaceChildren(el("p", "hub-notice error", callback.message || error.message), button("もう一度接続", render)); } }
   } else {
-    root.append(title("積み重ねた、あなたの足あと", "できた日も、意識して休んだ日も。ここからまた始められる。", "YOUR RECORDS")); renderCalendar(root, state, commit);
+    root.append(title("カレンダーと達成記録", "日付を選ぶと、その日の達成を確認できます。休む日や気持ちも記録できます。", "小さな一歩を振り返る")); renderCalendar(root, state, commit);
   }
 }
 window.addEventListener("hashchange", render);
