@@ -6,6 +6,7 @@ const APP_SHELL = [
   "./settings.html",
   "./hub.html",
   "./src/hub-app.mjs",
+  "./src/hub-release.mjs",
   "./src/navigation.mjs",
   "./src/features/habits/state.mjs",
   "./src/features/habits/dom.mjs",
