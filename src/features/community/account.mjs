@@ -1,7 +1,7 @@
 import { cloud, query, requireRows } from "./client.mjs";
 import { el, button, link, field, panel, notice, run } from "../habits/dom.mjs";
 import { createBackup, restoreBackup, parseBackup } from "../backup/backup.mjs";
-import { googleSignInOptions } from "./auth.mjs";
+import { beginGoogleSignIn } from "./auth.mjs";
 
 export function renderSignIn(root, refresh, authClient = cloud.auth) {
   const card = panel("一緒に続ける、最初の一歩", "家族とやることを分け合ったり、同じ目標の仲間を応援したり。ログインすると仲間の機能が使えます。");
@@ -14,7 +14,7 @@ export function renderSignIn(root, refresh, authClient = cloud.auth) {
   card.append(benefits);
   const login = button("Googleでログイン", () => run(login, async () => {
     notice("Googleのログイン画面へ移動します…");
-    await query(authClient.signInWithOAuth(googleSignInOptions(location.href)));
+    await beginGoogleSignIn(authClient, location.href, window);
   }), "hub-button primary google-login");
   card.append(login, el("p", "muted", "初めての方もこのボタンから。Googleの画面で認証し、このアプリへ戻ります。"), link("ログインせず、個人のタスクを使う →", "./index.html", "text-link"));
   const help = el("details", "hub-details login-help"); help.append(el("summary", "", "ログインできないとき"));

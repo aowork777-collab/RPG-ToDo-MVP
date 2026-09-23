@@ -45,12 +45,12 @@ test("OAuth callbacks and cancellations are detected without reflecting provider
 });
 test("Google button invokes only OAuth; network failure restores retry and shows feedback", async t => {
   const {root} = setup(t); let received;
-  renderSignIn(root, () => {}, {async signInWithOAuth(options) {received = options; return {data: null, error: {message: "テスト接続エラー"}};}});
+  renderSignIn(root, () => {}, {async signInWithOAuth(options) {received = options; return {data: null, error: {message: "Failed to fetch"}};}});
   assert.equal(root.querySelectorAll('input[type="password"], input[type="email"]').length, 0);
   const login = root.querySelector("button"); assert.equal(login.textContent, "Googleでログイン");
   login.click(); assert.equal(login.disabled, true); await settle();
   assert.deepEqual(received, googleSignInOptions(url)); assert.equal(login.disabled, false);
-  assert.match(document.getElementById("hubNotice").textContent, /テスト接続エラー/);
+  assert.match(document.getElementById("hubNotice").textContent, /AUTH_NETWORK/);
 });
 test("OAuth invalid_client return explains configuration failure without exposing provider details", t => {
   setup(t);

@@ -4,7 +4,7 @@ import { renderCalendar } from "./features/habits/calendar.mjs";
 import { el, button, link, field, selectField, panel, submit, notice, run } from "./features/habits/dom.mjs";
 import { renderAdventure } from "./game/ui/adventure-map.mjs";
 import { getProgress } from "./model.mjs";
-import { readAuthReturn, cleanAuthReturn } from "./features/community/auth.mjs";
+import { readAuthReturn, cleanAuthReturn, LoginError } from "./features/community/auth.mjs";
 
 const root = document.getElementById("hubRoot");
 let request = 0, authSubscribed = false;
@@ -59,10 +59,22 @@ async function render() {
           lastUser = nextUser;
         });
       }
-      const user = await currentUser(); if (runId !== request) return;
+      let user;
+      try {
+        user = await currentUser(authReturn ? callback : undefined);
+      } catch (error) {
+        if (!(error instanceof LoginError)) throw error;
+        if (runId !== request) return;
+        finishAuthReturn();
+        content.replaceChildren();
+        renderSignIn(content, render);
+        notice(error.message, "error");
+        return;
+      }
+      if (runId !== request) return;
       finishAuthReturn();
       content.replaceChildren();
-      if (!user) {renderSignIn(content, render); if (callback.message) notice(callback.message, "error"); else if (callback.returned) notice("ログインを完了できませんでした。同じブラウザからもう一度ログインしてください。", "error"); return;}
+      if (!user) {renderSignIn(content, render); return;}
       const tabs = el("nav", "hub-tabs"); tabs.setAttribute("aria-label", "仲間のメニュー"); const area = el("div", "hub-stack"); content.append(tabs, area);
       let tabRequest = 0;
       async function show(which) {

@@ -1,5 +1,5 @@
 import { createClient } from "../../vendor/supabase.mjs";
-import { authErrorMessage } from "./auth.mjs";
+import { authErrorMessage, resolveAuthUser } from "./auth.mjs";
 
 // Publishable key: access is enforced by database RLS, never by this key's secrecy.
 export const cloud = createClient("https://rxvdnikizkyfavczoyym.supabase.co", "sb_publishable_FOkzOdXd_9pAl1Xc4Wz5xA_ayVM1Pwc", {
@@ -19,5 +19,5 @@ export async function query(request) {
   }
   return data;
 }
-export async function currentUser() { const {data, error} = await cloud.auth.getSession(); if (error) throw error; return data.session?.user || null; }
+export async function currentUser(callback) { return resolveAuthUser(cloud.auth, callback); }
 export function requireRows(rows) { if (!rows?.length) throw Error("変更できませんでした。権限が取り消されたか、ほかの端末で更新されています。再読み込みしてください。"); return rows; }
