@@ -1,3 +1,4 @@
+import { createIcon } from "../../ui/icons.mjs";
 import { dateKey, validDateKey, daySummary, weekSummary, badges } from "./state.mjs";
 import { el, button, field, selectField, panel, submit, empty, notice } from "./dom.mjs";
 
@@ -45,7 +46,7 @@ export function renderCalendar(root, state, commit) {
     const form = el("form", "hub-form"), rest = el("label", "hub-check"), checkbox = el("input");
     checkbox.type = "checkbox"; checkbox.name = "rest"; checkbox.checked = Boolean(summary.rest);
     rest.append(checkbox, el("span", "", "この日は、意識して休む日"));
-    form.append(rest, selectField("気分（任意）", "mood", [["", "選択しない"], ["good", "😊 よかった"], ["okay", "🙂 ふつう"], ["tired", "🌙 疲れた"]], summary.mood || ""), field("ひとこと（自分だけの記録）", "note", summary.note || "", {multiline: true, max: 300, placeholder: "できたこと、休んだ理由、明日の自分へ"}), submit("この日の記録を保存"));
+    form.append(rest, selectField("気分（任意）", "mood", [["", "選択しない"], ["good", "よかった"], ["okay", "ふつう"], ["tired", "疲れた"]], summary.mood || ""), field("ひとこと（自分だけの記録）", "note", summary.note || "", {multiline: true, max: 300, placeholder: "できたこと、休んだ理由、明日の自分へ"}), submit("この日の記録を保存"));
     form.addEventListener("submit", event => {
       event.preventDefault(); if (!validDateKey(selected) || selected > dateKey()) return;
       const data = new FormData(form), previous = habits.days[selected]; habits.days[selected] = {rest: data.has("rest"), mood: data.get("mood"), note: String(data.get("note")).trim()};
@@ -67,6 +68,6 @@ export function renderCalendar(root, state, commit) {
   });
   reflection.append(form); root.append(reflection);
   const trophies = panel("あなたの功績"), cards = el("div", "badge-grid");
-  for (const badge of badges(habits)) { const card = el("article", `badge-card${badge.earned ? " earned" : ""}`); card.append(el("span", "badge-icon", badge.earned ? badge.icon : "◇"), el("strong", "", badge.name), el("p", "muted", badge.description), el("small", "", badge.earned ? "獲得済み" : "これからの楽しみ")); cards.append(card); }
+  for (const badge of badges(habits)) { const card = el("article", `badge-card${badge.earned ? " earned" : ""}`); card.append(createIcon(badge.earned ? badge.icon : "lock", "badge-icon"), el("strong", "", badge.name), el("p", "muted", badge.description), el("small", "", badge.earned ? "獲得済み" : "これからの楽しみ")); cards.append(card); }
   trophies.append(cards); root.append(trophies); draw();
 }

@@ -246,10 +246,11 @@ export class CanvasRenderer {
     } else if (kind === "player") {
       this.drawPlayerFallback(context, actor);
     } else {
-      context.font = `${Math.floor(actor.height * 0.58)}px system-ui`;
-      context.textAlign = "center";
-      context.textBaseline = "bottom";
-      context.fillText(actor.fallback, 0, 0);
+      // A quiet silhouette while the sprite is unavailable, never an emoji.
+      context.fillStyle = actor.color || '#70818d';
+      context.beginPath(); context.ellipse(0, -actor.height * .3, actor.width * .3, actor.height * .3, 0, 0, Math.PI * 2); context.fill();
+      context.fillStyle = '#e6edf1';
+      for (const x of [-1, 1]) {context.beginPath(); context.arc(x * actor.width * .1, -actor.height * .36, 4, 0, Math.PI * 2); context.fill();}
     }
 
     // Impact particles provide feedback without flashing an opaque rectangle.
@@ -269,10 +270,10 @@ export class CanvasRenderer {
   }
 
   drawPlayerFallback(context, actor) {
-    context.font = `${Math.floor(actor.height * 0.62)}px system-ui`;
-    context.textAlign = "center";
-    context.textBaseline = "bottom";
-    context.fillText(actor.fallback || "🧙‍♂️", 0, 0);
+    const h = actor.height;
+    context.fillStyle = '#718e9c';
+    context.beginPath(); context.arc(0, -h * .7, h * .1, 0, Math.PI * 2); context.fill();
+    context.beginPath(); context.moveTo(0, -h * .58); context.lineTo(-h * .2, 0); context.lineTo(h * .2, 0); context.closePath(); context.fill();
   }
 
   drawEffects() {

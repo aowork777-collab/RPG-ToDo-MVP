@@ -1,5 +1,5 @@
 import { loadState, saveState } from "./storage.mjs";
-import { AVATARS, normalizeTags } from "./features/habits/state.mjs";
+import { renderProfileEditor } from "./features/habits/profile.mjs";
 import { renderCalendar } from "./features/habits/calendar.mjs";
 import { el, button, link, field, selectField, panel, submit, notice, run } from "./features/habits/dom.mjs";
 import { renderAdventure } from "./game/ui/adventure-map.mjs";
@@ -30,16 +30,9 @@ async function render() {
   const page = authReturn ? "community" : location.hash.slice(1) || "records";
   root.replaceChildren(); document.getElementById("hubNotice").hidden = true;
   if (page === "profile") {
-    root.append(title("プロフィール", "表示名・目標・興味のあるタグを設定できます。", "自分のペースで続けよう"));
-    const summary = panel(`${state.habits.profile.avatar} ${state.habits.profile.name}`, `プレイヤーレベル ${getProgress(state.totalXp).level} · ${state.totalXp} XP`);
-    const form = el("form", "hub-form"), p = state.habits.profile;
-    form.append(field("表示名", "name", p.name, {required: true, max: 30, autocomplete: "nickname"}), selectField("アバター", "avatar", AVATARS.map(avatar => [avatar, avatar]), p.avatar), field("目指していること", "goal", p.goal, {max: 140, placeholder: "例：3か月後に英語で自己紹介できるようになる"}), field("興味のあるタグ（5個まで・カンマ区切り）", "tags", p.tags.join(", "), {max: 104, placeholder: "英語, 勉強, 読書"}), selectField("1つ以上達成する日を、週に何日つくる？", "weeklyGoal", Array.from({length: 7}, (_, i) => [i + 1, `週 ${i + 1} 日`]), state.habits.weeklyGoal), submit("プロフィールを保存"));
-    form.addEventListener("submit", event => {event.preventDefault(); const data = new FormData(form); const name = String(data.get("name")).trim(); if (!name) return;
-      const previousProfile = state.habits.profile, previousGoal = state.habits.weeklyGoal;
-      state.habits.profile = {name, avatar: data.get("avatar"), goal: String(data.get("goal")).trim(), tags: normalizeTags(data.get("tags"))}; state.habits.weeklyGoal = Number(data.get("weeklyGoal"));
-      if (commit()) {summary.querySelector("h2").textContent = `${state.habits.profile.avatar} ${name}`; notice("プロフィールを保存しました。仲間向けの公開は「仲間」のアカウントから選べます。");}
-      else {state.habits.profile = previousProfile; state.habits.weeklyGoal = previousGoal;}
-    }); summary.append(form); root.append(summary, link("仲間への公開・クラウド保管を設定 →", "./hub.html#community"));
+    root.append(title("プロフィール", "自分の写真・表示名・目標・興味のあるタグを設定できます。", "自分のペースで続けよう"));
+    renderProfileEditor(root, state, commit);
+    root.append(link("仲間への公開・クラウド保管を設定 →", "./hub.html#community"));
   } else if (page === "adventure") {
     root.append(title("冒険マップ", "タスクで上げたレベルが、戦う力になります。次のステージに挑戦しましょう。", "今日の一歩が、冒険の力に")); renderAdventure(root, getProgress(state.totalXp).level);
   } else if (page === "community") {

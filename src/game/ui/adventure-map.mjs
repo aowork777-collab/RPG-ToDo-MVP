@@ -1,3 +1,4 @@
+import { createIcon } from "../../ui/icons.mjs";
 import { CHAPTERS, relicBonuses } from "../data/chapters.mjs";
 import { GAME_SKILLS } from "../data/skills.mjs";
 import { MONSTERS } from "../data/monsters.mjs";
@@ -13,7 +14,7 @@ export function renderAdventure(root, playerLevel) {
   for (const chapter of CHAPTERS) {
     const done = save.clearedStage >= chapter.last, active = !done && next >= chapter.first, card = el("article", `chapter-card ${done ? "complete" : active ? "current" : "locked"}`);
     card.style.setProperty("--chapter-color", chapter.color);
-    card.append(el("span", "chapter-mark", chapter.icon), el("p", "chapter-status", `第${chapter.id}章 · ${done ? "制覇" : active ? "冒険中" : "未到達"}`), el("h2", "", chapter.name), el("p", "", chapter.story));
+    card.append(createIcon("compass", "chapter-mark"), el("p", "chapter-status", `第${chapter.id}章 · ${done ? "制覇" : active ? "冒険中" : "未到達"}`), el("h2", "", chapter.name), el("p", "", chapter.story));
     const route = el("div", "chapter-stages"); route.setAttribute("aria-label", `ステージ${chapter.first}〜${chapter.last}`);
     for (let level = chapter.first; level <= chapter.last; level++) {const dot = el("span", `${level <= save.clearedStage ? "cleared" : ""}${level % 5 === 0 ? " boss" : ""}`); dot.title = `ステージ ${level}${level % 5 === 0 ? " ボス" : ""}`; route.append(dot);}
     card.append(route, el("strong", "", done ? "✓ 遺物の力を獲得" : `ステージ ${chapter.last} 制覇で 攻撃+2 / HP+5`)); chapters.append(card);
@@ -24,6 +25,6 @@ export function renderAdventure(root, playerLevel) {
   for (const skill of GAME_SKILLS) { const unlocked = playerLevel >= (skill.unlockLevel || 1), card = el("article", unlocked ? "unlocked" : ""); card.append(el("h3", "", skill.subtitle), el("p", "", skill.description), el("small", "", unlocked ? "✓ 使用可能" : `ToDoで LEVEL ${skill.unlockLevel} になると解放`)); skills.append(card); }
   growth.append(skills); root.append(growth);
   const codex = panel("モンスター図鑑", "討伐した敵を記録。3回倒すと、その魔物に詳しい研究者になります。"), creatures = el("div", "mastery-list");
-  for (const monster of MONSTERS) {const count = save.defeatedMonsters[monster.id] || 0, card = el("article", count >= 3 ? "unlocked" : ""); card.append(el("h3", "", `${count ? monster.icon : "◇"} ${count ? monster.name : "未発見の魔物"}`), el("p", "", count ? monster.region : "遠征を進めて出会おう"), el("small", "", count ? `討伐 ${count} 回 · ${count >= 3 ? "研究完了" : `研究完了まで ${3 - count} 回`}` : "未発見")); creatures.append(card); }
+  for (const monster of MONSTERS) {const count = save.defeatedMonsters[monster.id] || 0, card = el("article", count >= 3 ? "unlocked" : ""); card.append(el("h3", "", count ? monster.name : "未発見の魔物"), el("p", "", count ? monster.region : "遠征を進めて出会おう"), el("small", "", count ? `討伐 ${count} 回 · ${count >= 3 ? "研究完了" : `研究完了まで ${3 - count} 回`}` : "未発見")); creatures.append(card); }
   codex.append(creatures); root.append(codex);
 }

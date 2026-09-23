@@ -1,3 +1,4 @@
+import { renderAvatar } from "../habits/photo.mjs";
 import { cloud, query, requireRows } from "./client.mjs";
 import { el, button, link, field, panel, notice, run } from "../habits/dom.mjs";
 import { createBackup, restoreBackup, parseBackup } from "../backup/backup.mjs";
@@ -36,15 +37,17 @@ export async function renderAccount(root, user, state, refresh, signedOut = refr
   const profile = panel("仲間に見せるプロフィール", "この端末のプロフィールをコピーします。共有ボードに個人タスク全体を公開する機能ではありません。");
   let remoteProfile = await query(cloud.from("profiles").select("*").eq("id", user.id).maybeSingle());
   const visible = el("label", "hub-check"), checkbox = el("input"); checkbox.type = "checkbox"; checkbox.checked = Boolean(remoteProfile?.discoverable);
-  visible.append(checkbox, el("span", "", "タグ検索でプロフィールを見つけてもらう（ログイン利用者に名前・目標・タグを公開）"));
+  visible.append(checkbox, el("span", "", "タグ検索でプロフィールを見つけてもらう（ログイン利用者に写真・名前・目標・タグを公開）"));
   const publish = button("現在のプロフィールを保存", () => run(publish, async () => {
     const p = state.habits.profile;
-    const fields = {display_name: p.name, avatar: p.avatar, goal: p.goal, tags: p.tags, discoverable: checkbox.checked};
+    const fields = {display_name: p.name, avatar: "user", avatar_photo: p.photo || null, goal: p.goal, tags: p.tags, discoverable: checkbox.checked};
     if (remoteProfile) requireRows(await query(cloud.from("profiles").update(fields).eq("id", user.id).select("id")));
     else await query(cloud.from("profiles").insert({id: user.id, ...fields}));
     remoteProfile = fields; notice("仲間向けプロフィールを保存しました。");
   }));
-  profile.append(el("p", "", `${state.habits.profile.avatar} ${state.habits.profile.name}`), visible, publish); root.append(profile);
+  const identity = el("div", "profile-identity");
+  identity.append(renderAvatar(el("div", "profile-avatar"), state.habits.profile), el("strong", "", state.habits.profile.name));
+  profile.append(identity, visible, publish); root.append(profile);
 
   const backup = panel("自分専用のクラウド保管", "個人ToDo・功績・冒険をまとめて保管します。自動同期ではありません。別の端末では、ログインして「復元」を選んでください。");
   const snapshot = await query(cloud.from("cloud_saves").select("revision,updated_at").eq("user_id", user.id).maybeSingle());

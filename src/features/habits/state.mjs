@@ -1,5 +1,5 @@
+import { normalizePhoto } from "./photo.mjs";
 // Personal habit data lives inside rpg-todo:v1 so existing backups include it.
-export const AVATARS = Object.freeze(["🌱", "🧑‍🚀", "🦊", "🐱", "🦉", "🐉", "🌙", "🌻"]);
 export function dateKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -34,7 +34,7 @@ export function normalizeHabits(raw = {}, knownTasks = []) {
   const reflections = {};
   for (const [key, value] of Object.entries(raw?.reflections || {})) if (validDateKey(key)) reflections[key] = text(value, 600);
   return {
-    profile: {name: text(profile.name, 30) || "冒険者", avatar: AVATARS.includes(profile.avatar) ? profile.avatar : "🌱", goal: text(profile.goal, 140), tags: normalizeTags(profile.tags)},
+    profile: {name: text(profile.name, 30) || "冒険者", avatar: "user", photo: normalizePhoto(profile.photo), goal: text(profile.goal, 140), tags: normalizeTags(profile.tags)},
     weeklyGoal: Math.max(1, Math.min(7, integer(raw?.weeklyGoal, 4))),
     completions, days, reflections,
   };
@@ -61,10 +61,10 @@ export function weekSummary(habits, today = new Date()) {
 export function badges(habits) {
   const items = Object.values(habits.completions), days = new Set(items.map(item => item.date)).size;
   return [
-    {name: "最初の一歩", description: "タスクを1件達成", earned: items.length >= 1, icon: "🌱"},
-    {name: "小さな積み重ね", description: "タスクを10件達成", earned: items.length >= 10, icon: "✨"},
-    {name: "7日の足あと", description: "7日間で達成を記録（連続でなくてOK）", earned: days >= 7, icon: "🗓"},
-    {name: "続ける力", description: "30日間で達成を記録", earned: days >= 30, icon: "🏅"},
-    {name: "やさしい再出発", description: "小さくしたタスクを達成", earned: items.some(item => item.small), icon: "🍃"},
+    {name: "最初の一歩", description: "タスクを1件達成", earned: items.length >= 1, icon: "steps"},
+    {name: "小さな積み重ね", description: "タスクを10件達成", earned: items.length >= 10, icon: "layers"},
+    {name: "7日の足あと", description: "7日間で達成を記録（連続でなくてOK）", earned: days >= 7, icon: "calendar"},
+    {name: "続ける力", description: "30日間で達成を記録", earned: days >= 30, icon: "award"},
+    {name: "やさしい再出発", description: "小さくしたタスクを達成", earned: items.some(item => item.small), icon: "leaf"},
   ];
 }

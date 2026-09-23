@@ -1,3 +1,5 @@
+import { renderAvatar } from "../habits/photo.mjs";
+import { createIcon } from "../../ui/icons.mjs";
 import { cloud, query } from "./client.mjs";
 import { dateKey, weekStart } from "../habits/state.mjs";
 import { el, button, field, selectField, panel, submit, empty, notice, run } from "../habits/dom.mjs";
@@ -48,7 +50,7 @@ export async function renderGroups(root, user, state) {
     for (const post of posts.slice(0, 60)) {
       const item = el("article", "checkin-card"); item.append(el("small", "muted", `${post.nickname} · ${post.day}`), el("p", "", post.message));
       const supporters = cheers.filter(cheer => cheer.checkin_id === post.id), mine = supporters.some(cheer => cheer.user_id === user.id);
-      const cheer = button(`${mine ? "♥ エール済み" : "♡ エール"} ${supporters.length}`, () => run(cheer, async () => { if (mine) await query(cloud.from("cheers").delete().eq("checkin_id", post.id).eq("user_id", user.id)); else await query(cloud.from("cheers").insert({checkin_id: post.id, user_id: user.id})); await refresh(); })); cheer.disabled = post.user_id === user.id; cheer.setAttribute("aria-pressed", String(mine)); item.append(cheer);
+      const cheer = button(`${mine ? "エール済み" : "エール"} ${supporters.length}`, () => run(cheer, async () => { if (mine) await query(cloud.from("cheers").delete().eq("checkin_id", post.id).eq("user_id", user.id)); else await query(cloud.from("cheers").insert({checkin_id: post.id, user_id: user.id})); await refresh(); })); cheer.prepend(createIcon("heart")); cheer.disabled = post.user_id === user.id; cheer.setAttribute("aria-pressed", String(mine)); item.append(cheer);
       if (post.user_id === user.id || group.owner_id === user.id) { const remove = button("投稿を削除", () => run(remove, async () => { if (!confirm("この投稿を削除しますか？")) return; await query(cloud.from("group_checkins").delete().eq("id", post.id)); await refresh(); }), "hub-button subtle"); item.append(remove); } card.append(item);
     }
     const leave = button("このサークルを退会", () => run(leave, async () => { if (!confirm("サークルを退会しますか？過去の投稿は残ります。消したい投稿は先に削除してください。")) return; await query(cloud.from("group_members").delete().eq("group_id", group.id).eq("user_id", user.id)); await refresh(); })); card.append(leave);
@@ -57,8 +59,8 @@ export async function renderGroups(root, user, state) {
   }
   const discover = panel("同じタグの冒険者", "プロフィールを公開すると設定した人だけが表示されます。");
   if (state.habits.profile.tags.length) {
-    const people = await query(cloud.from("profiles").select("id,display_name,avatar,goal,tags").eq("discoverable", true).overlaps("tags", state.habits.profile.tags).neq("id", user.id).limit(24));
-    for (const person of people) { const row = el("article", "checkin-card"); row.append(el("strong", "", `${person.avatar} ${person.display_name}`), el("p", "", person.goal), el("small", "muted", person.tags.map(tag => `#${tag}`).join(" "))); discover.append(row); }
+    const people = await query(cloud.from("profiles").select("id,display_name,avatar,avatar_photo,goal,tags").eq("discoverable", true).overlaps("tags", state.habits.profile.tags).neq("id", user.id).limit(24));
+    for (const person of people) { const row = el("article", "checkin-card"); row.append(renderAvatar(el("div", "profile-avatar"), {name: person.display_name, photo: person.avatar_photo}), el("strong", "", person.display_name), el("p", "", person.goal), el("small", "muted", person.tags.map(tag => `#${tag}`).join(" "))); discover.append(row); }
     if (!people.length) discover.append(empty("同じタグの仲間はまだ見つかりません", "プロフィールのタグを増やすか、サークルを作ってみましょう。"));
   } else discover.append(el("p", "muted", "プロフィールで興味のあるタグを設定してください。")); root.append(discover);
 }

@@ -22,3 +22,18 @@
 .main-navigation .nav-copy strong { font-size: .88rem; }
 .main-navigation .nav-copy small { font-size: .65rem; font-weight: 400; }
 @media (max-width: 720px) { .main-navigation .nav-copy small { display: none; } }
+.ui-icon{display:inline-block;width:22px;height:22px;flex:none;vertical-align:middle}
+.ui-icon.badge-icon,.ui-icon.chapter-mark{width:32px;height:32px}
+.hub-button>.ui-icon{width:18px;height:18px;margin-right:6px}
+.profile-avatar{display:grid;place-items:center;flex:none;width:52px;height:52px;overflow:hidden;border-radius:50%;background:#e8f0ed;color:#28645a;font-size:1.3rem;font-weight:700}
+.profile-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.avatar.profile-avatar span{color:inherit;font:inherit;letter-spacing:0}
+.profile-avatar-large{width:112px;height:112px;font-size:2.5rem}
+.profile-identity{display:flex;align-items:center;gap:12px;margin:16px 0}
+.profile-photo-editor{display:flex;align-items:center;gap:24px;padding:20px 0;border-bottom:1px solid #91a29b40}
+.profile-photo-controls{display:grid;gap:10px;min-width:0;flex:1}
+.profile-photo-controls .hub-button{justify-self:start}
+.profile-photo-controls input{max-width:100%;width:100%;font:inherit;font-size:.85rem}
+.profile-photo-controls input::file-selector-button{padding:9px 12px;margin-right:10px;border:1px solid #becfc8;border-radius:8px;background:#f7faf9;color:#234d43;cursor:pointer;font:inherit}
+.profile-photo-controls .muted{margin:0;font-size:.8rem}
+@media(max-width:480px){.profile-photo-editor{align-items:flex-start;flex-direction:column;gap:16px}.profile-photo-controls{width:100%}}

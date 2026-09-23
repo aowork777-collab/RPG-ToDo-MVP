@@ -1,3 +1,4 @@
+import { renderAvatar } from "./photo.mjs";
 import { dateKey, weekSummary, daySummary } from "./state.mjs";
 import { el, button, field, submit, link } from "./dom.mjs";
 import { calculateTaskReward } from "../../model.mjs";
@@ -5,7 +6,7 @@ import { calculateTaskReward } from "../../model.mjs";
 export function renderTodayHabits(state, commit) {
   const name = document.querySelector(".player-name"), avatar = document.querySelector(".player-identity .avatar");
   if (name) name.textContent = state.habits.profile.name;
-  if (avatar) avatar.textContent = state.habits.profile.avatar;
+  if (avatar) renderAvatar(avatar, state.habits.profile);
   let root = document.getElementById("todayHabitSummary");
   if (!root) {root = el("section", "panel today-habits"); root.id = "todayHabitSummary"; document.querySelector(".profile-card")?.after(root);}
   const week = weekSummary(state.habits), today = dateKey(), summary = daySummary(state.habits, today);
