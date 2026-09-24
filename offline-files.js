@@ -1,5 +1,6 @@
 /* Generated list of shipped offline resources. */
 const APP_SHELL = [
+  "./src/todo-release.mjs",
   "./src/features/daily/schedule.mjs",
   "./src/features/planning/state.mjs",
   "./src/features/planning/ui.mjs",
