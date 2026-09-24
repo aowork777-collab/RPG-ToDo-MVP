@@ -27,6 +27,7 @@ export function renderCalendar(root, state, commit) {
     const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
     for (let day = 1; day <= days; day++) {
       const key = dateKey(new Date(month.getFullYear(), month.getMonth(), day, 12)), summary = daySummary(habits, key);
+      if (summary.status === "empty" && state.planning?.reviews[key]) summary.status = "recorded";
       const node = button("", () => { selected = key; draw(); }, `calendar-day ${summary.status}${key === today ? " today" : ""}`);
       node.setAttribute("aria-pressed", String(key === selected));
       node.setAttribute("aria-label", `${key}：${summary.count ? `${summary.count}件達成` : summary.status === "rest" ? "休む日" : summary.status === "recorded" ? "記録あり" : "未記録"}`);
@@ -41,7 +42,12 @@ export function renderCalendar(root, state, commit) {
     const list = el("ul", "achievement-list");
     for (const item of summary.items) { const row = el("li"); row.append(el("span", "", `✓ ${item.title}`), el("strong", "", `+${item.xp} XP`)); list.append(row); }
     if (summary.items.length) detail.append(list);
-    else detail.append(empty("まだ達成記録はありません", "予定を休みにした日も、ひとこと残せます。"));
+    const review = state.planning?.reviews[selected];
+    if (review) {
+      detail.append(el("h3", "", "一日の振り返り"), el("p", "", review.note || "振り返りを記録しました。"));
+      for (const d of review.decisions) detail.append(el("p", "muted", `${d.title}：${d.choice === "skip" ? "休むと決めた" : d.choice === "tomorrow" ? "翌日に回した" : "未完了"}`));
+    }
+    if (!summary.items.length && !review) detail.append(empty("まだ達成記録はありません", "予定を休みにした日も、ひとこと残せます。"));
     if (selected > today) { detail.append(el("p", "muted", "未来の日付です。当日になったら記録できます。")); return; }
     const form = el("form", "hub-form"), rest = el("label", "hub-check"), checkbox = el("input");
     checkbox.type = "checkbox"; checkbox.name = "rest"; checkbox.checked = Boolean(summary.rest);

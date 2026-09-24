@@ -1,3 +1,4 @@
+import { normalizeSchedule } from "./schedule.mjs";
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export function getLocalDateKey(date = new Date()) {
@@ -53,6 +54,7 @@ function normalizeTemplate(template, index) {
     ),
 
     title: title.slice(0, 60),
+    schedule: normalizeSchedule(template.schedule),
     difficulty,
 
     dueTime:

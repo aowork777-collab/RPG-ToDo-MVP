@@ -1,7 +1,7 @@
 /* Version the cache whenever releasing a changed app shell. */
 importScripts("./offline-files.js");
 const CACHE_PREFIX="rpg-todo-app:"+self.registration.scope+":";
-const CACHE_NAME=CACHE_PREFIX+"20260923-profile-4";
+const CACHE_NAME=CACHE_PREFIX+"20260924-planning-1";
 const absolute=path=>new URL(path,self.registration.scope).href;
 const known=new Set([...APP_SHELL,...GAME_ASSETS].map(absolute));
 self.addEventListener("install",event=>{
@@ -12,6 +12,10 @@ self.addEventListener("activate",event=>{
     for(const name of await caches.keys())if(name.startsWith(CACHE_PREFIX)&&name!==CACHE_NAME)await caches.delete(name);
     await self.clients.claim();
   })());
+});
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  event.waitUntil(self.clients.openWindow(new URL("./index.html#planning",self.registration.scope).href));
 });
 self.addEventListener("fetch",event=>{
   const url=new URL(event.request.url);url.search="";url.hash="";

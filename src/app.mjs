@@ -1,4 +1,6 @@
 import { renderTodayHabits, openSmallStep } from "./features/habits/today.mjs";
+import { mountPlanning } from "./features/planning/ui.mjs";
+import { startReminders } from "./features/planning/reminders.mjs";
 import {
   addTask,
   removeTask,
@@ -234,16 +236,21 @@ function handleDeleteTask(
 function handleAddTask(
   formData,
 ) {
+  const before = structuredClone(state);
   const isDaily =
     formData.get(
       "repeatDaily",
     ) === "on";
 
   if (isDaily) {
+    const schedule = {kind:formData.get("scheduleKind") || "daily", weekdays:formData.getAll("weekdays").map(Number), interval:Number(formData.get("intervalDays")), start:formData.get("scheduleStart") || ""};
+    if (schedule.kind === "weekly" && !schedule.weekdays.length) { showToast(elements,"曜日を選んでください","週に1日以上選んでください","!"); return; }
+    if (schedule.kind === "interval" && !schedule.start) { showToast(elements,"開始日を選んでください","何日おきか数える基準日です","!"); return; }
     const result =
       addDailyTemplate(
         state,
         {
+          schedule,
           title:
             formData.get(
               "title",
@@ -265,7 +272,7 @@ function handleAddTask(
       return;
     }
 
-    persist();
+    if (!persist().ok) { state = before; render(); return; }
     render();
 
     closeQuestDialog(
@@ -274,7 +281,7 @@ function handleAddTask(
 
     announce(
       elements,
-      `${result.template.title}を毎日タスクへ登録しました`,
+      `${result.template.title}を定期タスクへ登録しました`,
     );
 
     const createdReward =
@@ -283,8 +290,8 @@ function handleAddTask(
 
     showToast(
       elements,
-      "毎日タスクを登録しました",
-      `${result.template.title} / +${createdReward} XP`,
+      "定期タスクを登録しました",
+      result.createdTasks.length ? `${result.template.title} / 完了時 +${createdReward} XP` : `${result.template.title} / 次の予定日に追加されます`,
       "＋",
     );
 
@@ -395,8 +402,8 @@ function handleToggleDailyTemplate(
   showToast(
     elements,
     template.enabled
-      ? "毎日タスクを再開しました"
-      : "毎日タスクを停止しました",
+      ? "定期タスクを再開しました"
+      : "定期タスクを停止しました",
     template.title,
     "↺",
   );
@@ -420,7 +427,7 @@ function handleDeleteDailyTemplate(
 
   const confirmed =
     window.confirm(
-      `「${template.title}」の毎日設定を削除しますか？`,
+      `「${template.title}」の繰り返し設定を削除しますか？`,
     );
 
   if (!confirmed) {
@@ -437,12 +444,12 @@ function handleDeleteDailyTemplate(
 
   announce(
     elements,
-    `${template.title}の毎日設定を削除しました`,
+    `${template.title}の繰り返し設定を削除しました`,
   );
 
   showToast(
     elements,
-    "毎日設定を削除しました",
+    "繰り返し設定を削除しました",
     template.title,
     "×",
   );
@@ -473,7 +480,7 @@ function handleDailyDateChange(
     showToast(
       elements,
       "日付が変わりました",
-      `${result.createdTasks.length}件の毎日タスクを生成しました`,
+      `${result.createdTasks.length}件の定期タスクを生成しました`,
       "↺",
     );
   }
@@ -797,6 +804,15 @@ function init() {
 
   state =
     loadState();
+
+  mountPlanning({getState:()=>state, commit:change=>{
+    const before=structuredClone(state);
+    try {change(state);} catch(error){state=before;throw error;}
+    const result=persist(); if(!result.ok) state=before;
+    if(result.ok && elements.questSearch) elements.questSearch.value="";
+    render(); return result.ok;
+  },notify:(title,detail)=>showToast(elements,title,detail,"✓")});
+  startReminders(()=>state.planning.reminder,(title,detail)=>showToast(elements,title,detail,"!"));
 
   generateTodayTasks(
     state,

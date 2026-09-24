@@ -1,3 +1,4 @@
+import { scheduleLabel, isScheduled } from "./schedule.mjs";
 import {
   calculateTaskReward,
 } from "../../model.mjs";
@@ -16,16 +17,16 @@ function createEmptyState(actions) {
   empty.className = "daily-empty";
 
   const title = document.createElement("strong");
-  title.textContent = "毎日のクエストは未登録です";
+  title.textContent = "定期タスクは未登録です";
 
   const description = document.createElement("p");
   description.textContent =
-    "毎日必ず行いたいタスクを登録できます。";
+    "毎日・曜日・間隔を決めて登録できます。";
 
   const button = document.createElement("button");
   button.type = "button";
   button.className = "primary-button";
-  button.textContent = "毎日クエストを追加";
+  button.textContent = "定期タスクを追加";
 
   button.addEventListener(
     "click",
@@ -89,6 +90,7 @@ function createTemplateItem(
   due.textContent = formatDueTime(
     template.dueTime,
   );
+  due.textContent = `${scheduleLabel(template)} · ${due.textContent}`;
 
   const reward = document.createElement("span");
   reward.className = "xp-reward";
@@ -108,6 +110,8 @@ function createTemplateItem(
     status.textContent = "停止中";
   } else if (todayTask?.completed) {
     status.textContent = "本日完了";
+  } else if (!todayTask && !isScheduled(template, todayKey)) {
+    status.textContent = "今日は予定なし";
   } else {
     status.textContent = "本日未完了";
   }
@@ -161,7 +165,7 @@ function createTemplateItem(
 
   deleteButton.setAttribute(
     "aria-label",
-    `${template.title}の毎日設定を削除`,
+    `${template.title}の繰り返し設定を削除`,
   );
 
   deleteButton.addEventListener(

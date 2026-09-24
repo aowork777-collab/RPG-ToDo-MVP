@@ -1,4 +1,5 @@
 import { normalizeHabits } from "./features/habits/state.mjs";
+import { normalizePlanning } from "./features/planning/state.mjs";
 import {
   createBattleInitialState,
   normalizeBattleState,
@@ -106,6 +107,7 @@ export function createDefaultState() {
     filter: "active",
     tasks: [],
     habits: normalizeHabits(),
+    planning: normalizePlanning(),
 
     daily:
       createDailyInitialState(),
@@ -325,6 +327,7 @@ export function normalizeState(
         : "active",
 
     tasks,
+    planning: normalizePlanning(rawState.planning),
     habits: normalizeHabits(rawState.habits, [...(Array.isArray(rawState.tasks) ? rawState.tasks : []), ...(Array.isArray(rawState.daily?.history) ? rawState.daily.history : [])]),
 
     daily:

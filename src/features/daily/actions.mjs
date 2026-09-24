@@ -1,3 +1,4 @@
+import { normalizeSchedule, isScheduled } from "./schedule.mjs";
 import {
   calculateTaskReward,
   clampDifficulty,
@@ -89,7 +90,7 @@ export function generateTodayTasks(
 
   // 今日のタスクを生成
   for (const template of daily.templates) {
-    if (!template.enabled) {
+    if (!template.enabled || !isScheduled(template, dateKey)) {
       continue;
     }
 
@@ -138,6 +139,7 @@ export function addDailyTemplate(
   const template = {
     id: createId(),
     title: title.slice(0, 60),
+    schedule: normalizeSchedule(values.schedule),
 
     difficulty: clampDifficulty(
       values.difficulty,

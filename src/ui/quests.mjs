@@ -4,6 +4,7 @@ import {
 } from "./helpers.mjs";
 
 import { deadlineLabel } from "../features/tasks/details.mjs";
+import { dateKey } from "../features/habits/state.mjs";
 
 function matchesFilter(task, filter) {
   if (filter === "active") {
@@ -50,7 +51,7 @@ function createEmptyState(filter) {
   return empty;
 }
 
-function createQuestItem(task, actions) {
+function createQuestItem(task, actions, decision) {
   const item = document.createElement("article");
 
   item.className =
@@ -93,6 +94,12 @@ function createQuestItem(task, actions) {
 
   const meta = document.createElement("div");
   meta.className = "task-meta";
+  if (!task.completed && decision && decision !== "keep") {
+    const status = document.createElement("span");
+    status.className = "review-task-status";
+    status.textContent = decision === "skip" ? "今日は休むと決めた" : "翌日に繰り越し";
+    meta.append(status);
+  }
 
   const difficulty = document.createElement("span");
   difficulty.className = "difficulty";
@@ -233,7 +240,7 @@ export function renderQuestList(
 
   visibleTasks.forEach((task) => {
     fragment.append(
-      createQuestItem(task, actions),
+      createQuestItem(task, actions, state.planning?.reviews[dateKey()]?.decisions.find(d=>d.id===task.id)?.choice),
     );
   });
 

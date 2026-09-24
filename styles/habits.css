@@ -37,3 +37,19 @@
 .profile-photo-controls input::file-selector-button{padding:9px 12px;margin-right:10px;border:1px solid #becfc8;border-radius:8px;background:#f7faf9;color:#234d43;cursor:pointer;font:inherit}
 .profile-photo-controls .muted{margin:0;font-size:.8rem}
 @media(max-width:480px){.profile-photo-editor{align-items:flex-start;flex-direction:column;gap:16px}.profile-photo-controls{width:100%}}
+/* Planning tools share the existing calm, high-contrast task surface. */
+.planning-tools {display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px;}
+.planning-tools .hub-button {min-height:44px;font-size:0.9rem;}
+.planning-dialog {width:min(640px,calc(100% - 24px));max-height:88dvh;overflow:auto;}
+.planning-dialog .dialog-header {position:sticky;top:0;background:var(--color-surface,#fff);z-index:1;padding:10px 0;}
+.planning-dialog h2 {font-size:1.25rem;}
+.planning-history {display:grid;gap:8px;max-height:45dvh;overflow:auto;}
+.planning-history button {text-align:left;overflow-wrap:anywhere;}
+.planning-message {color:#23583e;line-height:1.6;white-space:pre-wrap;}
+.planning-preview {max-height:35dvh;overflow:auto;padding-left:24px;overflow-wrap:anywhere;}
+.planning-weekdays {display:flex;flex-wrap:wrap;gap:8px;border:1px solid #cbd5df;padding:12px;border-radius:10px;}
+.planning-weekdays label {display:flex;align-items:center;gap:6px;min-height:44px;padding:0 8px;}
+.planning-weekdays input {width:18px;height:18px;}
+[data-schedule-options][hidden], [data-kind][hidden] {display:none!important;}
+.review-task-status {border-radius:6px;padding:3px 7px;color:#43546b;background:#edf1f6;}
+@media(max-width:480px){.planning-tools{display:grid;grid-template-columns:1fr 1fr;}.planning-tools .hub-button{padding:10px 8px;}.planning-dialog{padding:16px;}}

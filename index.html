@@ -10,9 +10,9 @@
   <link rel="stylesheet" href="./styles/base.css" />
   <link rel="stylesheet" href="./styles/feedback.css" />
   <link rel="stylesheet" href="./styles/todo.css?v=20260914" />
-  <script type="module" src="./src/app.mjs?v=20260914"></script>
+  <script type="module" src="./src/app.mjs?v=20260924-planning-1"></script>
   <link rel="stylesheet" href="./styles/app.css" />
-  <link rel="stylesheet" href="./styles/habits.css?v=20260923-profile-4" />
+  <link rel="stylesheet" href="./styles/habits.css?v=20260924-planning-1" />
   <link rel="stylesheet" href="./styles/clarity.css" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./assets/app/icon-192.png" />
@@ -54,6 +54,7 @@
             <button class="quick-add-button" type="submit">追加 <span aria-hidden="true">＋</span></button>
           </form>
           <p class="quick-hint">ここから追加すると、完了時に20 XP。期限や繰り返しは「タスクを追加」で設定できます。</p>
+          <nav id="planning" class="planning-tools" aria-label="タスクの追加と振り返り"></nav>
           <div class="list-toolbar">
             <div class="filter-tabs" role="group" aria-label="タスクの表示切り替え">
               <button type="button" class="filter-tab active" data-filter="active" aria-pressed="true">未完了</button>
@@ -65,8 +66,8 @@
           <div class="quest-list" id="questList"></div>
         </section>
         <details class="daily-section panel" id="dailySettings">
-          <summary><span><strong>毎日の繰り返し設定</strong><small>登録したタスクは、日付が変わると一覧に追加されます。</small></span></summary>
-          <div class="daily-settings-content"><div class="daily-section-header"><h2 id="dailySectionTitle">登録している習慣</h2><button class="secondary-button" id="openDailyQuestButton" type="button">＋ 毎日タスクを追加</button></div><div class="daily-template-list" id="dailyTemplateList"></div></div>
+          <summary><span><strong>定期タスクの設定</strong><small>毎日・指定曜日・○日おき。予定日に一覧へ追加されます。</small></span></summary>
+          <div class="daily-settings-content"><div class="daily-section-header"><h2 id="dailySectionTitle">登録している習慣</h2><button class="secondary-button" id="openDailyQuestButton" type="button">＋ 定期タスクを追加</button></div><div class="daily-template-list" id="dailyTemplateList"></div></div>
         </details>
       </div>
     </main>
@@ -90,7 +91,14 @@
       <input class="text-input" id="questDueTime" name="dueTime" type="time" />
       <label class="field-label" for="questNote">メモ <span>通常タスクのみ・任意</span></label>
       <textarea class="text-input" id="questNote" name="note" rows="2" maxlength="500" data-single-task></textarea>
-      <label class="daily-repeat-option"><input id="repeatDaily" name="repeatDaily" type="checkbox" /><span><strong>毎日繰り返す</strong><small>日付が変わると新しいタスクを自動作成</small></span></label>
+      <label class="daily-repeat-option"><input id="repeatDaily" name="repeatDaily" type="checkbox" /><span><strong>定期的に繰り返す</strong><small>予定日に新しいタスクを自動作成</small></span></label>
+      <div data-schedule-options hidden class="hub-form">
+        <label class="hub-field">繰り返し方<select name="scheduleKind"><option value="daily">毎日</option><option value="weekly">曜日を選ぶ</option><option value="interval">○日おき</option></select></label>
+        <fieldset data-kind="weekly" hidden class="planning-weekdays"><legend>実施する曜日</legend>
+          <label><input type="checkbox" name="weekdays" value="1">月</label><label><input type="checkbox" name="weekdays" value="2">火</label><label><input type="checkbox" name="weekdays" value="3">水</label><label><input type="checkbox" name="weekdays" value="4">木</label><label><input type="checkbox" name="weekdays" value="5">金</label><label><input type="checkbox" name="weekdays" value="6">土</label><label><input type="checkbox" name="weekdays" value="0">日</label>
+        </fieldset>
+        <div data-kind="interval" hidden class="hub-form"><label class="hub-field">何日おき？<input name="intervalDays" type="number" min="1" max="365" value="2" required></label><label class="hub-field">開始日<input name="scheduleStart" type="date" required></label></div>
+      </div>
       <div class="reward-preview"><span>完了時の報酬</span><strong id="rewardPreview">+20 XP</strong></div>
       <div class="dialog-actions"><button class="secondary-button" type="button" id="cancelDialogButton">キャンセル</button><button class="primary-button" type="submit">タスクを追加</button></div>
     </form>

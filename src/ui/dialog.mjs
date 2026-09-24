@@ -6,6 +6,15 @@ import {
 import { setText } from "./helpers.mjs";
 
 export function updateRewardPreview(elements) {
+  const options = elements.questForm.querySelector("[data-schedule-options]");
+  if (options) {
+    options.hidden = !elements.repeatDaily?.checked;
+    const kind = elements.questForm.elements.scheduleKind.value;
+    options.querySelectorAll("[data-kind]").forEach(group => {
+      group.hidden = group.dataset.kind !== kind;
+      group.querySelectorAll("input").forEach(input => {input.disabled = options.hidden || group.hidden;});
+    });
+  }
   elements.questForm.querySelectorAll("[data-single-task]").forEach(input => { input.disabled = Boolean(elements.repeatDaily?.checked); });
   const difficulty = clampDifficulty(
     elements.questForm.elements.difficulty.value,

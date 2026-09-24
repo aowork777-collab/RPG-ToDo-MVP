@@ -1,5 +1,9 @@
 /* Generated list of shipped offline resources. */
 const APP_SHELL = [
+  "./src/features/daily/schedule.mjs",
+  "./src/features/planning/state.mjs",
+  "./src/features/planning/ui.mjs",
+  "./src/features/planning/reminders.mjs",
   "./",
   "./index.html",
   "./battle.html",
