@@ -1,7 +1,7 @@
 /* Version the cache whenever releasing a changed app shell. */
 importScripts("./offline-files.js");
 const CACHE_PREFIX="rpg-todo-app:"+self.registration.scope+":";
-const CACHE_NAME=CACHE_PREFIX+"20260924-planning-2";
+const CACHE_NAME=CACHE_PREFIX+"20260925-quest-icon-1";
 const absolute=path=>new URL(path,self.registration.scope).href;
 const known=new Set([...APP_SHELL,...GAME_ASSETS].map(absolute));
 self.addEventListener("install",event=>{

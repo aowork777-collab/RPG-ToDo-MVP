@@ -1,5 +1,9 @@
 /* Generated list of shipped offline resources. */
 const APP_SHELL = [
+  "./assets/app/quest-icon-192.png",
+  "./assets/app/quest-icon-512.png",
+  "./assets/app/quest-apple-180.png",
+  "./assets/app/quest-favicon-32.png",
   "./src/todo-release.mjs",
   "./src/features/daily/schedule.mjs",
   "./src/features/planning/state.mjs",
